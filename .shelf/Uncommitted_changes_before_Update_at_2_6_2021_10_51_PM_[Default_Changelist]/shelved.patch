@@ -1,0 +1,708 @@
+Index: src/main/java/me/trambled/ozark/ozarkclient/module/movement/Static.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package me.trambled.ozark.ozarkclient.module.movement;\r\n\r\nimport me.trambled.ozark.ozarkclient.module.Category;\r\nimport me.trambled.ozark.ozarkclient.module.Module;\r\nimport me.trambled.ozark.ozarkclient.module.Setting;\r\nimport net.minecraft.network.play.client.CPacketPlayer;\r\nimport net.minecraft.util.math.RayTraceResult;\r\nimport net.minecraft.util.math.Vec3d;\r\n\r\n// phobos\r\npublic class Static extends Module {\r\n    \r\n    public Static() {\r\n        super(Category.MOVEMENT);\r\n\r\n\t\tthis.name        = \"Static\";\r\n\t\tthis.tag         = \"Static\";\r\n\t\tthis.description = \"Stops movement.\";\r\n    }\r\n\r\n    Setting mode = create(\"Mode\", \"Mode\", \"AntiVoid\", combobox(\"Static\", \"AntiVoid\", \"Roof\"));\r\n\tSetting disabler = create(\"Disable\", \"Disable\", false);\r\n\tSetting ySpeed = create(\"YSpeed\", \"YSpeed\", false);\r\n\tSetting speed = create(\"Speed\", \"Speed\", 0.1, 0f, 10f);\r\n\tSetting height = create(\"Height\", \"Height\", 3f, 0f, 256f);\r\n\r\n\r\n    @Override\r\n    public void update() {\r\n\t\tif (full_null_check()) return;\r\n\t\tif (mode.in(\"Static\")) {\r\n\t\t\tStatic.mc.player.capabilities.isFlying = false;\r\n            Static.mc.player.motionX = 0.0;\r\n            Static.mc.player.motionY = 0.0;\r\n            Static.mc.player.motionZ = 0.0;\r\n            if (!this.ySpeed.get_value(true)) return;\r\n            Static.mc.player.jumpMovementFactor = (float) this.speed.get_value(1d);\r\n            if (Static.mc.gameSettings.keyBindJump.isKeyDown()) {\r\n                Static.mc.player.motionY += this.speed.get_value(1d);\r\n            }\r\n            if (!Static.mc.gameSettings.keyBindSneak.isKeyDown()) return;\r\n            Static.mc.player.motionY -= this.speed.get_value(1d);\r\n\t\t} else if (mode.in(\"AntiVoid\")) {\r\n\t\t\tif (Static.mc.player.noClip || !(Static.mc.player.posY <= (double) this.height.get_value(1)))\r\n                return;\r\n            RayTraceResult trace = Static.mc.world.rayTraceBlocks(Static.mc.player.getPositionVector(), new Vec3d(Static.mc.player.posX, 0.0, Static.mc.player.posZ), false, false, false);\r\n            if (trace != null && trace.typeOfHit == RayTraceResult.Type.BLOCK) {\r\n                return;\r\n            }\r\n            Static.mc.player.setVelocity(0.0, 0.0, 0.0);\r\n            if (Static.mc.player.getRidingEntity() == null) return;\r\n\t\t\tStatic.mc.player.getRidingEntity().setVelocity(0.0, 0.0, 0.0);\r\n\t\t} else if (mode.in(\"Roof\")) {\r\n\t\t\tStatic.mc.player.connection.sendPacket(new CPacketPlayer.Position(Static.mc.player.posX, 10000.0, Static.mc.player.posZ, Static.mc.player.onGround));\r\n            if (!this.disabler.get_value(true)) return;\r\n            this.set_disable();\r\n\t\t}\r\n    }\r\n\r\n    @Override\r\n    public void update_always() {\r\n        disabler.set_shown(mode.in(\"Roof\"));\r\n        ySpeed.set_shown(mode.in(\"Static\"));\r\n        speed.set_shown(mode.in(\"Static\") && ySpeed.get_value(true));\r\n        height.set_shown(mode.in(\"AntiVoid\"));\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/module/movement/Static.java b/src/main/java/me/trambled/ozark/ozarkclient/module/movement/Static.java
+--- a/src/main/java/me/trambled/ozark/ozarkclient/module/movement/Static.java	(revision d55a6856d1c814f0dd80b1a4e32c708dd660d1f4)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/module/movement/Static.java	(date 1622643229499)
+@@ -8,7 +8,7 @@
+ import net.minecraft.util.math.Vec3d;
+ 
+ // phobos
+-public class Static extends Module {
++public class    Static extends Module {
+     
+     public Static() {
+         super(Category.MOVEMENT);
+Index: src/main/java/me/trambled/ozark/ozarkclient/module/misc/DiscordRPC.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package me.trambled.ozark.ozarkclient.module.misc;\r\n\r\nimport me.trambled.ozark.ozarkclient.module.Category;\r\nimport me.trambled.ozark.ozarkclient.module.Module;\r\nimport me.trambled.ozark.ozarkclient.module.Setting;\r\nimport me.trambled.ozark.ozarkclient.util.DiscordUtil;\r\n\r\npublic class DiscordRPC extends Module\r\n{\r\n    public DiscordRPC() {\r\n        super(Category.MISC);\r\n        this.name = \"DiscordRPC\";\r\n        this.tag = \"DiscordRPC\";\r\n        this.description = \"Show people how cool you are (discord edition).\";\r\n    }\r\n\r\n    Setting large_image = create(\"Large Image\", \"RPCMode\", \"Normal\", combobox(\"Normal\", \"Lempity\", \"kambing\", \"Tudou\"));\r\n    Setting small_image = create(\"Small Image\", \"RPCSmallImage\", \"Server\", combobox(\"Server\", \"Tudou\"));\r\n    Setting state = create(\"State\", \"RPCState\", \"Health\", combobox(\"Server\", \"Health\", \"Speed\", \"Target\", \"User\"));\r\n    Setting details = create(\"Details\", \"RPCDetails\", \"Server\", combobox(\"Server\", \"Health\", \"Speed\", \"Target\", \"User\"));\r\n\r\n\r\n\r\n    @Override\r\n    protected void enable() {\r\n        DiscordUtil.init();\r\n    }\r\n\r\n    @Override\r\n    protected void disable() {\r\n        DiscordUtil.stop();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/module/misc/DiscordRPC.java b/src/main/java/me/trambled/ozark/ozarkclient/module/misc/DiscordRPC.java
+--- a/src/main/java/me/trambled/ozark/ozarkclient/module/misc/DiscordRPC.java	(revision d55a6856d1c814f0dd80b1a4e32c708dd660d1f4)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/module/misc/DiscordRPC.java	(date 1622643229562)
+@@ -20,7 +20,7 @@
+     Setting details = create("Details", "RPCDetails", "Server", combobox("Server", "Health", "Speed", "Target", "User"));
+ 
+ 
+-
++// INIT WHAT THE FUCK BRITISH INIT
+     @Override
+     protected void enable() {
+         DiscordUtil.init();
+Index: src/main/java/me/trambled/ozark/ozarkclient/guiscreen/gui/past/items/ModuleButton.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package me.trambled.ozark.ozarkclient.guiscreen.gui.past.items;\r\n\r\nimport me.trambled.ozark.ozarkclient.util.GuiUtil;\r\nimport me.trambled.ozark.ozarkclient.guiscreen.gui.past.Component;\r\nimport me.trambled.ozark.Ozark;\r\nimport me.trambled.ozark.ozarkclient.guiscreen.gui.past.Panel;\r\nimport me.trambled.ozark.ozarkclient.util.FontUtil;\r\nimport me.trambled.ozark.ozarkclient.module.Setting;\r\nimport me.trambled.ozark.ozarkclient.module.Module;\r\nimport net.minecraft.client.Minecraft;\r\nimport net.minecraft.client.audio.PositionedSoundRecord;\r\nimport net.minecraft.client.gui.Gui;\r\nimport net.minecraft.client.gui.ScaledResolution;\r\nimport net.minecraft.init.SoundEvents;\r\nimport static me.trambled.ozark.ozarkclient.util.WrapperUtil.mc;\r\n\r\n\r\nimport java.util.ArrayList;\r\n\r\npublic class ModuleButton extends Component {\r\n    public ArrayList<Component> subcomponents;\r\n    public Module mod;\r\n    public Panel parent;\r\n    public int offset;\r\n    private boolean open;\r\n    private boolean hovered;\r\n    private int all_offset;\r\n\r\n    public ModuleButton(Module mod, Panel parent, int offset) {\r\n        this.mod = mod;\r\n        this.parent = parent;\r\n        this.offset = offset;\r\n        this.all_offset = offset;\r\n        this.subcomponents = new ArrayList<>();\r\n        this.open = false;\r\n        int opY = offset + 15;\r\n            for (Setting settings : Ozark.get_setting_manager().get_settings_with_module(mod)) {\r\n                if (settings.is_shown()) {\r\n                    if (settings.get_type().equals(\"button\")) {\r\n                        this.subcomponents.add(new BooleanComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"integerslider\")) {\r\n                        this.subcomponents.add(new IntegerComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"doubleslider\")) {\r\n                        this.subcomponents.add(new DoubleComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"combobox\")) {\r\n                        this.subcomponents.add(new ModeComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"label\")) {\r\n                        this.subcomponents.add(new InfoComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"bind\")) {\r\n                        this.subcomponents.add(new KeybindSettingComponent(settings, this, opY));\r\n                    } else if (settings.get_type().equals(\"string\")) {\r\n                        this.subcomponents.add(new StringComponent(settings, this, opY));\r\n                    }\r\n                }\r\n            }\r\n        this.subcomponents.add(new KeybindComponent(this, opY));\r\n    }\r\n\r\n    @Override\r\n    public void setOff(final int newOff) {\r\n        this.offset = newOff;\r\n    }\r\n\r\n    @Override\r\n    public void renderComponent() {\r\n        // glitchy in updateComponent\r\n        int new_offset = all_offset;\r\n        for (Component comp : subcomponents) {\r\n            new_offset += 15;\r\n            if (!comp.is_shown()) {\r\n                new_offset -= 15;\r\n            }\r\n            comp.setOff(new_offset);\r\n\r\n        }\r\n        if (this.mod.is_active() || mod.get_tag().equalsIgnoreCase(\"PastGUI\")) {\r\n            GuiUtil.draw_rect(parent.getX() - 1, parent.getY() + offset, parent.getX() + parent.getWidth() + 1, parent.getY() + 15 + offset + 1, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n            GuiUtil.draw_rect(parent.getX() - 1, parent.getY() + offset, parent.getX(), parent.getY() + 15 + offset, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n            GuiUtil.draw_rect(parent.getX() + parent.getWidth(), parent.getY() + offset, parent.getX() + parent.getWidth() + 1, parent.getY() + 15 + offset, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n            GuiUtil.draw_rect(parent.getX(), parent.getY() + offset, parent.getX() + parent.getWidth(), parent.getY() + 15 + offset, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n\r\n            Gui.drawRect(parent.getX(), parent.getY() + offset, parent.getX() + parent.getWidth(), parent.getY() + 15 + offset, 0x75101010);\r\n        } else {\r\n            GuiUtil.draw_rect(parent.getX() - 1, parent.getY() + offset, parent.getX() + parent.getWidth() + 1, parent.getY() + 15 + offset + 1, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n            GuiUtil.draw_rect(parent.getX() - 1, parent.getY() + offset, parent.getX(), parent.getY() + 15 + offset, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n            GuiUtil.draw_rect(parent.getX() + parent.getWidth(), parent.getY() + offset, parent.getX() + parent.getWidth() + 1, parent.getY() + 15 + offset, Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIR\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIG\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIB\").get_value(1), Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIA\").get_value(1));\r\n\r\n            Gui.drawRect(parent.getX(), parent.getY() + offset, parent.getX() + parent.getWidth(), parent.getY() + 15 + offset, 0xFF111111);\r\n        }\r\n\r\n        if (Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIHoverChange\").get_value(true) && hovered) {\r\n            FontUtil.drawText(this.mod.get_name(), parent.getX() + 6, parent.getY() + offset + 4, -1);\r\n        } else {\r\n            FontUtil.drawText(this.mod.get_name(), parent.getX() + 4, parent.getY() + offset + 4, -1);\r\n        }\r\n\r\n        if (this.subcomponents.size() > 1) {\r\n            FontUtil.drawText(\"...\", parent.getX() + parent.getWidth() - 10, (parent.getY() + offset + 4), -1);\r\n        }\r\n\r\n        if (Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUIDescriptions\").get_value(true) && hovered) {\r\n            FontUtil.drawText(mod.get_description(), 2, (new ScaledResolution(mc).getScaledHeight() - FontUtil.getFontHeight() - 2), -1);\r\n        }\r\n\r\n        if (this.open && !this.subcomponents.isEmpty()) {\r\n            for (Component comp : this.subcomponents) {\r\n                if (comp.is_shown()) {\r\n                    comp.renderComponent();\r\n                }\r\n            }\r\n        }\r\n        this.parent.refresh();\r\n\r\n    }\r\n\r\n    @Override\r\n    public void closeAllSub() {\r\n        this.open = false;\r\n    }\r\n\r\n    @Override\r\n    public int getHeight() {\r\n        if (this.open) {\r\n            int hidden_off = 0;\r\n            for (Component hidden : subcomponents) {\r\n                if (!hidden.is_shown()) {\r\n                    hidden_off++;\r\n                }\r\n            }\r\n            return (15 * (this.subcomponents.size() + 1)) - (15 * hidden_off);\r\n        }\r\n        return 15;\r\n    }\r\n\r\n    @Override\r\n    public void updateComponent(int mouseX, int mouseY) {\r\n        this.hovered = this.isMouseOnButton(mouseX, mouseY);\r\n        if (!this.subcomponents.isEmpty()) {\r\n            for (Component comp : this.subcomponents) {\r\n                comp.updateComponent(mouseX, mouseY);\r\n            }\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void mouseClicked(int mouseX, int mouseY, int button) {\r\n        if (isMouseOnButton(mouseX, mouseY) && button == 0) {\r\n            this.mod.toggle();\r\n\r\n            if (Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUISound\").get_value(true)) {\r\n                mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0f));\r\n            }\r\n        }\r\n\r\n        if (isMouseOnButton(mouseX, mouseY) && button == 1) {\r\n            if (Ozark.get_setting_manager().get_setting_with_tag(\"PastGUI\", \"PastGUISound\").get_value(true)) {\r\n                mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0f));\r\n            }\r\n\r\n            if (!this.isOpen()) {\r\n                parent.closeAllSetting();\r\n                this.setOpen(true);\r\n            } else {\r\n                this.setOpen(false);\r\n            }\r\n        }\r\n\r\n        for (Component comp : this.subcomponents) {\r\n            if (comp.is_shown()) {\r\n                comp.mouseClicked(mouseX, mouseY, button);\r\n            }\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void keyTyped(char typedChar, int key) {\r\n        for (Component comp : this.subcomponents) {\r\n            if (comp.is_shown()) {\r\n                comp.keyTyped(typedChar, key);\r\n            }\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void mouseReleased(int mouseX, int mouseY, int mouseButton) {\r\n        for (Component comp : this.subcomponents) {\r\n            if (comp.is_shown()) {\r\n                comp.mouseReleased(mouseX, mouseY, mouseButton);\r\n            }\r\n        }\r\n    }\r\n\r\n    public boolean isMouseOnButton(int x, int y) {\r\n        return x > parent.getX() && x < parent.getX() + 100 && y > this.parent.getY() + this.offset && y < this.parent.getY() + 15 + this.offset;\r\n    }\r\n\r\n    public boolean isOpen() {\r\n        return open;\r\n    }\r\n\r\n    public void setOpen(boolean open) {\r\n        this.open = open;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/gui/past/items/ModuleButton.java b/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/gui/past/items/ModuleButton.java
+--- a/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/gui/past/items/ModuleButton.java	(revision d55a6856d1c814f0dd80b1a4e32c708dd660d1f4)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/gui/past/items/ModuleButton.java	(date 1622643230049)
+@@ -7,11 +7,14 @@
+ import me.trambled.ozark.ozarkclient.util.FontUtil;
+ import me.trambled.ozark.ozarkclient.module.Setting;
+ import me.trambled.ozark.ozarkclient.module.Module;
++import me.trambled.turok.draw.RenderHelp;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.audio.PositionedSoundRecord;
+ import net.minecraft.client.gui.Gui;
+ import net.minecraft.client.gui.ScaledResolution;
+ import net.minecraft.init.SoundEvents;
++import org.lwjgl.opengl.GL11;
++
+ import static me.trambled.ozark.ozarkclient.util.WrapperUtil.mc;
+ 
+ 
+@@ -34,25 +37,25 @@
+         this.subcomponents = new ArrayList<>();
+         this.open = false;
+         int opY = offset + 15;
+-            for (Setting settings : Ozark.get_setting_manager().get_settings_with_module(mod)) {
+-                if (settings.is_shown()) {
+-                    if (settings.get_type().equals("button")) {
+-                        this.subcomponents.add(new BooleanComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("integerslider")) {
+-                        this.subcomponents.add(new IntegerComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("doubleslider")) {
+-                        this.subcomponents.add(new DoubleComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("combobox")) {
+-                        this.subcomponents.add(new ModeComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("label")) {
+-                        this.subcomponents.add(new InfoComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("bind")) {
+-                        this.subcomponents.add(new KeybindSettingComponent(settings, this, opY));
+-                    } else if (settings.get_type().equals("string")) {
+-                        this.subcomponents.add(new StringComponent(settings, this, opY));
+-                    }
+-                }
+-            }
++        for (Setting settings : Ozark.get_setting_manager().get_settings_with_module(mod)) {
++            if (settings.is_shown()) {
++                if (settings.get_type().equals("button")) {
++                    this.subcomponents.add(new BooleanComponent(settings, this, opY));
++                } else if (settings.get_type().equals("integerslider")) {
++                    this.subcomponents.add(new IntegerComponent(settings, this, opY));
++                } else if (settings.get_type().equals("doubleslider")) {
++                    this.subcomponents.add(new DoubleComponent(settings, this, opY));
++                } else if (settings.get_type().equals("combobox")) {
++                    this.subcomponents.add(new ModeComponent(settings, this, opY));
++                } else if (settings.get_type().equals("label")) {
++                    this.subcomponents.add(new InfoComponent(settings, this, opY));
++                } else if (settings.get_type().equals("bind")) {
++                    this.subcomponents.add(new KeybindSettingComponent(settings, this, opY));
++                } else if (settings.get_type().equals("string")) {
++                    this.subcomponents.add(new StringComponent(settings, this, opY));
++                }
++            }
++        }
+         this.subcomponents.add(new KeybindComponent(this, opY));
+     }
+ 
+@@ -94,14 +97,19 @@
+             FontUtil.drawText(this.mod.get_name(), parent.getX() + 4, parent.getY() + offset + 4, -1);
+         }
+ 
+-        if (this.subcomponents.size() > 1) {
+-            FontUtil.drawText("...", parent.getX() + parent.getWidth() - 10, (parent.getY() + offset + 4), -1);
++
++        if (this.open) {
++            RenderHelp.drawTriangleOutline(parent.getX() + 90f, parent.getY() + offset + 12f, 5f, 2, 1, 1,0XFFFFFF);
+         }
+ 
+         if (Ozark.get_setting_manager().get_setting_with_tag("PastGUI", "PastGUIDescriptions").get_value(true) && hovered) {
+             FontUtil.drawText(mod.get_description(), 2, (new ScaledResolution(mc).getScaledHeight() - FontUtil.getFontHeight() - 2), -1);
+         }
+-
++        else if(this.subcomponents.size() > 1) {
++            if (!this.open) {
++                FontUtil.drawText("...", parent.getX() + parent.getWidth() - 10, (parent.getY() + offset + 4), -1);
++            }
++        }
+         if (this.open && !this.subcomponents.isEmpty()) {
+             for (Component comp : this.subcomponents) {
+                 if (comp.is_shown()) {
+@@ -201,4 +209,7 @@
+     public void setOpen(boolean open) {
+         this.open = open;
+     }
+-}
++
++
++    }
++
+Index: src/main/java/me/trambled/ozark/ozarkclient/module/combat/AutoCrystal.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package me.trambled.ozark.ozarkclient.module.combat;\r\n\r\nimport me.trambled.turok.draw.RenderHelp;\r\nimport me.trambled.ozark.Ozark;\r\nimport me.trambled.ozark.ozarkclient.event.events.*;\r\nimport me.trambled.ozark.ozarkclient.module.Setting;\r\nimport me.trambled.ozark.ozarkclient.module.Category;\r\nimport me.trambled.ozark.ozarkclient.module.Module;\r\nimport me.trambled.ozark.ozarkclient.module.chat.AutoEz;\r\nimport me.trambled.ozark.ozarkclient.util.*;\r\n\r\nimport me.zero.alpine.fork.listener.EventHandler;\r\nimport me.zero.alpine.fork.listener.Listener;\r\nimport net.minecraft.entity.Entity;\r\nimport net.minecraft.entity.item.EntityEnderCrystal;\r\nimport net.minecraft.entity.player.EntityPlayer;\r\nimport net.minecraft.init.Blocks;\r\nimport net.minecraft.init.Items;\r\nimport net.minecraft.init.MobEffects;\r\nimport net.minecraft.init.SoundEvents;\r\nimport net.minecraft.item.*;\r\nimport net.minecraft.network.play.client.*;\r\nimport net.minecraft.network.play.server.*;\r\nimport net.minecraft.util.EnumHand;\r\nimport net.minecraft.util.SoundCategory;\r\nimport net.minecraft.util.math.BlockPos;\r\nimport net.minecraftforge.event.world.BlockEvent;\r\nimport net.minecraftforge.fml.common.eventhandler.SubscribeEvent;\r\n\r\nimport java.awt.*;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.Objects;\r\nimport java.util.concurrent.ConcurrentHashMap;\r\n\r\n// credit to:\r\n// travis for the original w+2 base and for the idea of packet block place\r\n// momentum/linus for momentum calcs, sync options, heuristics, rotations, and the concept of inhibit mode\r\n// perry for settings\r\n// oyvey for predict break and for most of the code for predict place\r\n//pineaple client for glow mode render\r\n//kambing for the render settings\r\npublic class AutoCrystal extends Module {\r\n    public AutoCrystal() {\r\n        super(Category.COMBAT);\r\n\r\n        this.name        = \"AutoCrystal\";\r\n        this.tag         = \"AutoCrystal\";\r\n        this.description = \"Kills people (if ur good).\";\r\n    }\r\n\r\n    Setting setting = create(\"Setting\", \"CaSetting\", \"Place\", combobox(\"Place\", \"Break\", \"Place & Break\", \"Rotations\", \"Pause\", \"Render\", \"Misc\"));\r\n    Setting debug = create(\"Debug\", \"CaDebug\", false);\r\n    Setting place_crystal = create(\"Place\", \"CaPlace\", true);\r\n    Setting break_crystal = create(\"Break\", \"CaBreak\", true);\r\n    Setting anti_weakness = create(\"Anti-Weakness\", \"CaAntiWeakness\", true);\r\n    Setting alternative = create(\"Alternative\", \"CaAlternative\", false);\r\n    Setting module_check = create(\"Module Check\", \"CaModuleCheck\", true);\r\n    Setting break_predict = create(\"Break Predict\", \"CaBreakPredict\", true);\r\n    Setting place_predict = create(\"Place Predict\", \"CaPlacePredict\", false);\r\n    Setting sound_predict = create(\"Sound Predict\", \"CaSoundPredict\", true);\r\n    Setting city_predict = create(\"City Predict\", \"CaCityPredict\", true);\r\n\r\n    Setting motion_predict = create(\"Motion Predict\", \"CaMotionPredict\", true);\r\n    Setting verify_place = create(\"Verify Place\", \"CaVerifyPlace\", false);\r\n\r\n    Setting inhibit = create(\"Inhibit\", \"CaInhibit\", true);\r\n    Setting inhibit_delay = create(\"Inhibit Delay\", \"CaInhibitDelay\", 0, 0, 10);\r\n    Setting inhibit_swings = create(\"Inhibit Swings\", \"CaInhibitSwings\", 50, 1, 100);\r\n\r\n    Setting break_trys = create(\"Break Attempts\", \"CaBreakAttempts\", 1, 1, 6);\r\n    Setting place_trys = create(\"Place Attempts\", \"CaPlaceAttempts\", 1, 1, 6);  \r\n    \r\n    Setting hit_range = create(\"Hit Range\", \"CaHitRange\", 5f, 1f, 6f); \r\n    Setting place_range = create(\"Place Range\", \"CaPlaceRange\", 5f, 1f, 6f);\r\n    Setting hit_range_wall = create(\"Hit Range Wall\", \"CaHitRangeWall\", 3.5f, 1f, 6f);\r\n    Setting place_range_wall = create(\"Place Range Wall\", \"CaPlaceRangeWall\", 3.5f, 1f, 6f);\r\n    Setting player_range = create(\"Player Range\", \"CaPlayerRange\", 10, 1, 20);\r\n\r\n    Setting place_delay = create(\"Place Delay\", \"CaPlaceDelay\", 0, 0, 10);\r\n    Setting break_delay = create(\"Break Delay\", \"CaBreakDelay\", 1, 0, 10);\r\n\r\n    Setting min_player_place = create(\"Min Enemy Place\", \"CaMinEnemyPlace\", 6, 0, 20);\r\n    Setting min_player_break = create(\"Min Enemy Break\", \"CaMinEnemyBreak\", 6, 0, 20);\r\n    Setting max_self_damage = create(\"Max Self Damage\", \"CaMaxSelfDamage\", 8, 0, 36);\r\n    Setting min_health_pause = create(\"Min Health Pause\", \"CaMinHealthPause\", true);\r\n    Setting required_health = create(\"Required Health\", \"CaRequiredHealth\", 1, 1, 36);\r\n    \r\n    Setting ignore_web = create(\"Ignore Webs\", \"CaWebIgnore\", true);\r\n\r\n    Setting packet_place = create(\"Packet Place\", \"CaPacketPlace\", true);\r\n    Setting packet_break = create(\"Packet Break\", \"CaPacketBreak\", true);\r\n\r\n    Setting target_mode = create(\"Target Mode\", \"CaTargetMode\", \"Health\", combobox(\"Health\", \"Closest\"));\r\n    Setting raytrace = create(\"Raytrace\", \"CaRaytrace\", false);\r\n    Setting switch_mode = create(\"Switch Mode\", \"CaSwitchMode\", \"Normal\", combobox(\"Normal\", \"Ghost\", \"None\"));\r\n    Setting anti_suicide = create(\"Anti Suicide\", \"CaAntiSuicide\", true);\r\n    Setting fast_mode = create(\"Fast Mode\", \"CaFastMode\", true);\r\n    Setting fast_place = create(\"Fast Place\", \"CaFastPlace\", true);\r\n\r\n    Setting break_all = create(\"Break All\", \"CaBreakAll\", false);\r\n    Setting momentum = create(\"Momentum Calcs\", \"CaMomentumMode\", false);\r\n    Setting sync = create(\"Sync\", \"CaSync\", \"Sound\", combobox(\"Sound\", \"Instant\", \"Inhibit\", \"Attack\", \"Full\", \"Semi\", \"None\"));\r\n    Setting heuristic = create(\"Heuristic\", \"CaHeuristic\", \"Damage\", combobox(\"Damage\", \"MinMax\", \"Distance\", \"Atomic\"));\r\n    Setting heuristic_min_health = create(\"Heuristic Min Health\", \"CaHeuristicMinHealth\", 6, 0, 120);\r\n\r\n    Setting anti_stuck = create(\"Anti Stuck\", \"CaAntiStuck\", true);\r\n    Setting anti_stuck_tries = create(\"Anti Stuck Tries\", \"CaAntiStuckTries\", 5, 1, 15);\r\n    Setting anti_stuck_time = create(\"Anti Stuck Time\", \"CaAntiStuckTime\", 1000, 0, 20000);\r\n    Setting endcrystal = create(\"1.13 Mode\", \"CaThirteen\", false);\r\n    Setting multi_place = create(\"Multi Place\", \"CaMultiplace\", true);\r\n\r\n    Setting faceplace_mode = create(\"Faceplace Mode\", \"CaTabbottMode\", true);\r\n    Setting faceplace_mode_damage = create(\"Faceplace Health\", \"CaTabbottModeHealth\", 10, 0, 36);\r\n    Setting faceplace_check = create(\"No Sword FP\", \"CaJumpyFaceMode\", false);\r\n\r\n\r\n    Setting fuck_armor_mode = create(\"Armor Destroy\", \"CaArmorDestroy\", true);\r\n    Setting fuck_armor_mode_precent = create(\"Enemy Armor %\", \"CaArmorPercent\", 5, 0, 100);\r\n    Setting fuck_armor_mode_precent_self = create(\"Self Armor %\", \"CaArmorPercentSelf\", 0, 0, 100); // retard idea by me\r\n\r\n    Setting stop_while_mining = create(\"Stop While Mining\", \"CaStopWhileMining\", false);\r\n    Setting stop_while_eating = create(\"Stop While Eating\", \"CaStopWhileEatin\", false);\r\n\r\n    Setting swing = create(\"Swing\", \"CaSwing\", \"Mainhand\", combobox(\"Mainhand\", \"Offhand\", \"Both\", \"None\"));\r\n\r\n    // momentum\r\n    Setting rotate_mode = create(\"Rotate\", \"CaRotateMode\", \"Packet\", combobox(\"Off\", \"Packet\", \"Seizure\"));\r\n    Setting rotate_during = create(\"Rotate During\", \"CaRotateDuring\", \"Both\", combobox(\"Break\", \"Place\", \"Both\"));\r\n    Setting anti_waste = create(\"Rotate Focus\", \"CaRotateAntiWaste\", true);\r\n    Setting limiter = create(\"Limiter\", \"CaRotateLimiter\", \"None\", combobox(\"Narrow\", \"Upcoming\", \"None\"));\r\n    Setting max_angle = create(\"Max Angle\", \"CaMaxAngle\", 180f, 0f, 360f);\r\n    Setting min_angle = create(\"Min Angle\", \"CaMinAngle\", 180f, 0f, 360f);\r\n    Setting random_rotate = create(\"Random Rotate\", \"CaRandomRotate\", false);\r\n    Setting queue = create(\"Queue\", \"CaQueue\", false);\r\n    Setting accurate = create(\"Accurate\", \"CaAccurate\", true);\r\n    Setting rubberband = create(\"Detect Rubberband\", \"CaRotateDetectRubberband\", true);\r\n    Setting quick_restore = create(\"Quick Restore\", \"CaRestoreRotationInstant\", false);\r\n\r\n    Setting solid = create(\"Solid\", \"CaSolid\", true);\r\n    Setting outline = create(\"Outline\", \"CaOutline\", true);\r\n    Setting glow_solid = create(\"Glow Solid\", \"CaGlowSolid\", false);\r\n    Setting glow_outline = create(\"Glow Outline\", \"CaGlowOutline\", false);\r\n    Setting old_render = create(\"Old Render\", \"CaOldRender\", false);\r\n    Setting future_render = create(\"Future Render\", \"CaFutureRender\", false);\r\n    Setting top_block = create(\"Top Block\", \"CaTopBlock\", false);\r\n    Setting r = create(\"R\", \"CaR\", 255, 0, 255);\r\n    Setting g = create(\"G\", \"CaG\", 255, 0, 255);\r\n    Setting b = create(\"B\", \"CaB\", 255, 0, 255);\r\n    Setting a = create(\"Solid A\", \"CaA\", 100, 0, 255);\r\n    Setting a_out = create(\"Outline A\", \"CaOutlineA\", 255, 0, 255);\r\n    Setting glow_a = create(\"Glow Solid A\", \"CaGlowA\", 0, 0, 255);\r\n    Setting glow_a_out = create(\"Glow Outline A\", \"CaGlowOutlineA\", 0, 0, 255);\r\n    Setting rainbow_mode = create(\"Rainbow\", \"CaRainbow\", true);\r\n    Setting sat = create(\"Satiation\", \"CaSatiation\", 0.8, 0, 1);\r\n    Setting brightness = create(\"Brightness\", \"CaBrightness\", 0.8, 0, 1);\r\n    Setting height = create(\"Height\", \"CaHeight\", 1.0, 0.0, 1.0);\r\n    Setting render_damage = create(\"Render Damage\", \"CaRenderDamage\", \"Normal\", combobox(\"Normal\", \"Heuristic\", \"None\"));\r\n\r\n    Setting clean_mode = create(\"Clean Settings\", \"CaCleanMode\", true);\r\n    Setting switch_bind = create(\"Switch Bind\", \"CaSwitchBind\", 0);\r\n    Setting faceplace_bind = create(\"Faceplace Bind\", \"CaFaceBind\", 0);\r\n\r\n    private final ConcurrentHashMap<EntityEnderCrystal, Integer> attacked_crystals = new ConcurrentHashMap<>();\r\n    public static ArrayList<EntityEnderCrystal> fake_crystals = new ArrayList<>();\r\n\r\n    private final TimerUtil anti_stuck_timer = new TimerUtil();\r\n\r\n    private EntityPlayer ca_target = null;\r\n    private RotationUtil.Rotation ca_rotation = null;\r\n\r\n    private String detail_name = null;\r\n    private int detail_hp = 0;\r\n\r\n    private BlockPos render_block_init;\r\n    private BlockPos render_block_old;\r\n\r\n    private double render_damage_value;\r\n\r\n    private float yaw;\r\n    private float pitch;\r\n\r\n    private boolean already_attacking = false;\r\n    private boolean place_timeout_flag = false;\r\n    private boolean do_switch_bind = false;\r\n    private boolean face_place_bind = false;\r\n    private boolean did_anything;\r\n\r\n    private int place_timeout;\r\n    private int break_timeout;\r\n    private int inhibit_delay_counter;\r\n    private int break_delay_counter;\r\n    private int place_delay_counter;\r\n    private int attack_swings;\r\n\r\n    @Override\r\n    public void update() {\r\n        do_ca();\r\n    }\r\n\r\n    public void do_ca() {\r\n        if (mc.player == null || mc.world == null) {\r\n            return;\r\n        }\r\n\r\n        prepare_ca();\r\n\r\n        if (check_pause()) {\r\n            return;\r\n        }\r\n\r\n        if (sync.in(\"Full\")) {\r\n            do_fake_crystal();\r\n        }\r\n\r\n        if (check_pause()) {\r\n            return;\r\n        }\r\n\r\n        if (fast_mode.get_value(true)) {\r\n            break_delay_counter++;\r\n            place_delay_counter++;\r\n        }\r\n\r\n        if (place_crystal.get_value(true) && place_delay_counter > place_timeout) {\r\n            place_crystal();\r\n        }\r\n\r\n        if (break_crystal.get_value(true) && break_delay_counter > break_timeout) {\r\n            break_crystal();\r\n        }\r\n\r\n        if (ca_target == null) {\r\n            Ozark.TARGET_NAME = \"NULL\";\r\n        } else {\r\n            Ozark.TARGET_NAME = ca_target.getName();\r\n        }\r\n\r\n        if (render_block_init != null) {\r\n            if (!mc.world.getBlockState(render_block_init).getBlock().equals(Blocks.OBSIDIAN) && !mc.world.getBlockState(render_block_init).getBlock().equals(Blocks.BEDROCK)) {\r\n                render_block_init = null;\r\n            }\r\n        }\r\n\r\n        if (!did_anything) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            if (quick_restore.get_value(true) && ca_rotation != null) {\r\n                ca_rotation.restoreRotation();\r\n            }\r\n            ca_target = null;\r\n        }\r\n\r\n        if (ca_target != null) {\r\n            AutoEz.add_target(ca_target.getName());\r\n            detail_name = ca_target.getName();\r\n            detail_hp = Math.round(ca_target.getHealth() + ca_target.getAbsorptionAmount());\r\n        }\r\n\r\n        if (attack_swings > 2000) {\r\n            attack_swings = 0;\r\n        }\r\n\r\n\r\n\r\n        render_block_old = render_block_init;\r\n\r\n        if (!fast_mode.get_value(true)) {\r\n            break_delay_counter++;\r\n            place_delay_counter++;\r\n        }\r\n    }\r\n\r\n    public void place_crystal() {\r\n        BlockPos target_block;\r\n\r\n        target_block = get_best_block();\r\n\r\n        if (target_block == null) {\r\n            return;\r\n        }\r\n\r\n        place_delay_counter = 0;\r\n\r\n        already_attacking = false;\r\n\r\n        boolean offhand_check = false;\r\n        if (mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {\r\n            if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && !switch_mode.in(\"None\")) {\r\n                if (switch_bind.get_bind(\"\").equalsIgnoreCase(\"None\") || do_switch_bind) {\r\n                    if (switch_mode.in(\"Normal\")) {\r\n                        mc.player.inventory.currentItem = find_crystals_hotbar();\r\n                    } else {\r\n                        mc.player.connection.sendPacket(new CPacketHeldItemChange(find_crystals_hotbar()));\r\n                    }\r\n                    return;\r\n                }\r\n            }\r\n        } else {\r\n            offhand_check = true;\r\n        }\r\n\r\n        if (debug.get_value(true)) {\r\n            MessageUtil.send_client_message(\"placing\");\r\n        }\r\n\r\n        if (rotate_during.in(\"Both\") || rotate_during.in(\"Place\")) {\r\n            handle_rotations(false, target_block, null);\r\n        }\r\n\r\n        did_anything = true;\r\n        for (int i = 0; i < place_trys.get_value(1); i++) {\r\n            BlockUtil.placeCrystalOnBlock(target_block, offhand_check ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, packet_place.get_value(true));\r\n        }\r\n        if (sync.in(\"Semi\")) {\r\n            EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) target_block.getX() + 0.5, (double) target_block.getY() + 1, (double) target_block.getZ() + 0.5);\r\n            mc.world.addEntityToWorld(-101, crystal);\r\n            crystal.setInvisible(true);\r\n            fake_crystals.add(crystal);\r\n        }\r\n    }\r\n\r\n    public void break_crystal() {\r\n        EntityEnderCrystal crystal = get_best_crystal();\r\n        if (crystal == null) {\r\n            if (alternative.get_value(true)) {\r\n                place_crystal();\r\n            }\r\n            return;\r\n        }\r\n\r\n        if (anti_weakness.get_value(true) && mc.player.isPotionActive(MobEffects.WEAKNESS)) {\r\n\r\n            boolean should_weakness = true;\r\n\r\n            if (mc.player.isPotionActive(MobEffects.STRENGTH)) {\r\n\r\n                if (Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.STRENGTH)).getAmplifier() == 2) {\r\n                    should_weakness = false;\r\n                }\r\n\r\n            }\r\n\r\n            if (should_weakness) {\r\n\r\n                if (!already_attacking) {\r\n                    already_attacking = true;\r\n                }\r\n\r\n                int new_slot = -1;\r\n\r\n                for (int i = 0; i < 9; i++) {\r\n\r\n                    ItemStack stack = mc.player.inventory.getStackInSlot(i);\r\n\r\n                    if (stack.getItem() instanceof ItemSword || stack.getItem() instanceof ItemTool) {\r\n                        new_slot = i;\r\n                        mc.playerController.updateController();\r\n                        break;\r\n                    }\r\n\r\n                }\r\n\r\n                if (new_slot != -1) {\r\n                    mc.player.inventory.currentItem = new_slot;\r\n                }\r\n\r\n            }\r\n\r\n        }\r\n\r\n        if (debug.get_value(true)) {\r\n            MessageUtil.send_client_message(\"attacking\");\r\n        }\r\n\r\n        did_anything = true;\r\n\r\n        if (rotate_during.in(\"Break\") || rotate_during.in(\"Both\")) {\r\n            handle_rotations(true, null, crystal);\r\n        }\r\n\r\n        for (int i = 0; i < break_trys.get_value(1); i++) {\r\n            EntityUtil.attackEntity(crystal, packet_break.get_value(true), swing);\r\n            attack_swings++;\r\n        }\r\n        add_attacked_crystal(crystal);\r\n\r\n        if (sync.in(\"Instant\") && crystal.isEntityAlive()) {\r\n            crystal.setDead();\r\n        }\r\n\r\n        if (fake_crystals.contains(crystal) && sync.in(\"Semi\")) {\r\n            crystal.setDead();\r\n        }\r\n\r\n        break_delay_counter = 0;\r\n    }\r\n\r\n    // trololol\r\n    public void do_fake_crystal() {\r\n        if (mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {\r\n            if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && !switch_mode.in(\"None\")) {\r\n                if (switch_mode.in(\"Normal\")) {\r\n                    mc.player.inventory.currentItem = find_crystals_hotbar();\r\n                } else {\r\n                    mc.player.connection.sendPacket(new CPacketHeldItemChange(find_crystals_hotbar()));\r\n                }\r\n                return;\r\n            }\r\n        }\r\n        BlockPos block = get_best_block();\r\n        if (block == null) return;\r\n        if (mc.world == null) return;\r\n        if (mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL) return;\r\n        if (debug.get_value(true)) {\r\n            MessageUtil.send_client_message(\"Doing fake crystal\");\r\n        }\r\n        EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) block.getX() + 0.5, (double) block.getY() + 1, (double) block.getZ() + 0.5);\r\n        mc.world.addEntityToWorld(-101, crystal);\r\n        crystal.setDead();\r\n        if (mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL) {\r\n            mc.player.getHeldItemOffhand().setCount(mc.player.getHeldItemMainhand().getCount() - 1);\r\n            BlockUtil.swingArm(swing);\r\n        } else if (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) {\r\n            mc.player.getHeldItemMainhand().setCount(mc.player.getHeldItemMainhand().getCount() - 1);\r\n            BlockUtil.swingArm(swing);\r\n        }\r\n    }\r\n\r\n    public BlockPos get_best_block() {\r\n        if (get_best_crystal() != null && !fast_place.get_value(true)) {\r\n            place_timeout_flag = true;\r\n            return null;\r\n        }\r\n\r\n        if (place_timeout_flag) {\r\n            place_timeout_flag = false;\r\n            return null;\r\n        }\r\n\r\n        double best_damage = 0;\r\n        double rendered_damage = 0;\r\n        double minimum_damage;\r\n        double maximum_damage_self = this.max_self_damage.get_value(1);\r\n\r\n        BlockPos best_block = null;\r\n\r\n        List<BlockPos> blocks;\r\n\r\n        if (momentum.get_value(true)) {\r\n            blocks = CrystalUtil.crystalBlocksMomentum(mc.player, place_range.get_value(1), motion_predict.get_value(true), 1, !multi_place.get_value(true), endcrystal.get_value(true));\r\n        } else {\r\n            blocks = CrystalUtil.possiblePlacePositions(place_range.get_value(1), endcrystal.get_value(true), !multi_place.get_value(true));\r\n        }\r\n\r\n        for (Entity player : mc.world.playerEntities) {\r\n\r\n            if (target_mode.in(\"Health\")) {\r\n                if (FriendUtil.isFriend(player.getName())) continue;\r\n            }\r\n\r\n            for (BlockPos block : blocks) {\r\n\r\n                if (player.getDistance(mc.player) >= player_range.get_value(1)) continue;\r\n\r\n                if (player == mc.player || !(player instanceof EntityPlayer)) continue;\r\n\r\n                if (!BlockUtil.rayTracePlaceCheck(block, this.raytrace.get_value(true))) {\r\n                    continue;\r\n                }\r\n\r\n                if (verify_place.get_value(true) && mc.player.getDistanceSq(block) > Math.pow(hit_range.get_value(1), 2))\r\n                    continue;\r\n\r\n                if (!BlockUtil.canSeeBlock(block) && mc.player.getDistance(block.getX(), block.getY(), block.getZ()) > place_range_wall.get_value(1)) {\r\n                    continue;\r\n                }\r\n\r\n                EntityPlayer target;\r\n\r\n                if (target_mode.in(\"Health\")) {\r\n                    target = (EntityPlayer) player;\r\n                } else {\r\n                    target = get_closest_target();\r\n                }\r\n\r\n                if (target == null) continue;\r\n\r\n                if (target.isDead || target.getHealth() <= 0) continue;\r\n\r\n                boolean no_place = faceplace_check.get_value(true) && mc.player.getHeldItemMainhand().getItem() == Items.DIAMOND_SWORD;\r\n                if ((target.getHealth() < faceplace_mode_damage.get_value(1) && faceplace_mode.get_value(true)&& !no_place) || (get_armor_fucker(target) && !no_place && !get_armor_fucker(mc.player))) {\r\n                    minimum_damage = 2;\r\n                } else {\r\n                    minimum_damage = this.min_player_place.get_value(1);\r\n                }\r\n                \r\n                if (ignore_web.get_value(true) && mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.WEB) {\r\n                    mc.world.setBlockToAir(EntityUtil.getRoundedBlockPos(target));\r\n                }\r\n\r\n                double target_damage = CrystalUtil.calculateDamage((double) block.getX() + 0.5, (double) block.getY() + 1, (double) block.getZ() + 0.5, target);\r\n\r\n                if (target_damage < minimum_damage) continue;\r\n\r\n                final double self_damage = CrystalUtil.calculateDamage((double) block.getX() + 0.5, (double) block.getY() + 1, (double) block.getZ() + 0.5, mc.player);\r\n\r\n                if (self_damage > maximum_damage_self || (anti_suicide.get_value(true) && (mc.player.getHealth() + mc.player.getAbsorptionAmount()) - self_damage <= 0.5)) continue;\r\n\r\n                final double original_damage = target_damage;\r\n                if (target_damage > heuristic_min_health.get_value(1)) {\r\n                    if (heuristic.in(\"MinMax\")) {\r\n                        target_damage -= self_damage;\r\n                    } else if (heuristic.in(\"Distance\")) {\r\n                        target_damage -= mc.player.getDistance(block.getX(), block.getY(), block.getZ());\r\n                    } else if (heuristic.in(\"Atomic\")) {\r\n                        target_damage -= self_damage + mc.player.getDistance(block.getX(), block.getY(), block.getZ());\r\n                    }\r\n                }\r\n                if (target_damage > best_damage) {\r\n                    best_damage = target_damage;\r\n                    rendered_damage = original_damage;\r\n                    best_block = block;\r\n                    ca_target = target;\r\n                }\r\n            }\r\n        }\r\n\r\n\r\n        if (!momentum.get_value(true)) {\r\n            blocks.clear();\r\n        }\r\n\r\n\r\n\r\n        if (render_damage.in(\"Heuristic\")) {\r\n            render_damage_value = best_damage;\r\n        } else if (render_damage.in(\"Normal\")) {\r\n            render_damage_value = rendered_damage;\r\n        }\r\n        render_block_init = best_block;\r\n\r\n        return best_block;\r\n    }\r\n\r\n    public EntityEnderCrystal get_best_crystal() {\r\n        double best_damage = 0;\r\n\r\n        double minimum_damage;\r\n        double maximum_damage_self = this.max_self_damage.get_value(1);\r\n\r\n        double best_distance = 0;\r\n\r\n        EntityEnderCrystal best_crystal = null;\r\n\r\n        for (Entity c : mc.world.loadedEntityList) {\r\n\r\n            if (!(c instanceof EntityEnderCrystal)) continue;\r\n\r\n            EntityEnderCrystal crystal = (EntityEnderCrystal) c;\r\n            if (mc.player.getDistance(crystal) > (!mc.player.canEntityBeSeen(crystal) ? hit_range_wall.get_value(1) : hit_range.get_value(1))) {\r\n                continue;\r\n            }\r\n\r\n            if (!mc.player.canEntityBeSeen(crystal) && raytrace.get_value(true)) {\r\n                continue;\r\n            }\r\n\r\n            if (crystal.isDead) continue;\r\n\r\n            if (attacked_crystals.containsKey(crystal) && attacked_crystals.get(crystal) > anti_stuck_tries.get_value(1) && anti_stuck.get_value(true)) continue;\r\n\r\n            for (Entity player : mc.world.playerEntities) {\r\n\r\n                if (player.getDistance(mc.player) >= player_range.get_value(1)) continue;\r\n\r\n                if (player == mc.player || !(player instanceof EntityPlayer)) continue;\r\n\r\n                if (target_mode.in(\"Health\")) {\r\n                    if (FriendUtil.isFriend(player.getName())) continue;\r\n\r\n                    final EntityPlayer target = (EntityPlayer) player;\r\n\r\n                    if (target.isDead || target.getHealth() <= 0) continue;\r\n                }\r\n\r\n                EntityPlayer target;\r\n\r\n                if (target_mode.in(\"Health\")) {\r\n                    target = (EntityPlayer) player;\r\n                } else {\r\n                    target = get_closest_target();\r\n                }\r\n\r\n                if (target == null) continue;\r\n\r\n                boolean no_place = faceplace_check.get_value(true) && mc.player.getHeldItemMainhand().getItem() == Items.DIAMOND_SWORD;\r\n                if ((target.getHealth() < faceplace_mode_damage.get_value(1) && faceplace_mode.get_value(true)&& !no_place) || (get_armor_fucker(target) && !no_place && !get_armor_fucker(mc.player)) || (face_place_bind)) {\r\n                    minimum_damage = 2;\r\n                } else {\r\n                    minimum_damage = this.min_player_break.get_value(1);\r\n                }\r\n\r\n                final double target_damage = CrystalUtil.calculateDamage(crystal, target);\r\n\r\n                if (target_damage < minimum_damage) continue;\r\n\r\n                final double self_damage = CrystalUtil.calculateDamage(crystal, mc.player);\r\n\r\n                if (self_damage > maximum_damage_self || (anti_suicide.get_value(true) && (mc.player.getHealth() + mc.player.getAbsorptionAmount()) - self_damage <= 0.5)) continue;\r\n\r\n                if (target_damage > best_damage && !break_all.get_value(true)) {\r\n                    ca_target = target;\r\n                    best_damage = target_damage;\r\n                    best_crystal = crystal;\r\n                }\r\n\r\n\r\n            }\r\n\r\n            if (break_all.get_value(true) && mc.player.getDistanceSq(crystal) > best_distance) {\r\n                best_distance = mc.player.getDistanceSq(crystal);\r\n                best_crystal = crystal;\r\n            }\r\n\r\n        }\r\n\r\n        return best_crystal;\r\n\r\n    }\r\n\r\n    public boolean get_armor_fucker(EntityPlayer p) {\r\n        for (ItemStack stack : p.getArmorInventoryList()) {\r\n\r\n            if (stack == null || stack.getItem() == Items.AIR) return true;\r\n\r\n            final float armor_percent = ((float) (stack.getMaxDamage() - stack.getItemDamage()) / (float) stack.getMaxDamage()) * 100.0f;\r\n\r\n            if (p == mc.player) {\r\n                if (fuck_armor_mode.get_value(true) && fuck_armor_mode_precent_self.get_value(1) >= armor_percent) return true;\r\n            } else {\r\n                if (fuck_armor_mode.get_value(true) && fuck_armor_mode_precent.get_value(1) >= armor_percent) return true;\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n\r\n    public void prepare_ca() {\r\n        did_anything = false;\r\n\r\n        if (switch_bind.get_bind(\"\").equalsIgnoreCase(\"None\")) {\r\n            do_switch_bind = false;\r\n        }\r\n        if (faceplace_bind.get_bind(\"\").equalsIgnoreCase(\"None\")) {\r\n            face_place_bind = false;\r\n        }\r\n\r\n        if (rainbow_mode.get_value(true)) {\r\n            cycle_rainbow();\r\n        }\r\n\r\n        place_timeout = this.place_delay.get_value(1);\r\n        break_timeout = this.break_delay.get_value(1);\r\n\r\n        if (anti_stuck_timer.passed(anti_stuck_time.get_value(1))) {\r\n            anti_stuck_timer.reset();\r\n            attacked_crystals.clear();\r\n        }\r\n\r\n        if (rotate_mode.in(\"Seizure\")) {\r\n            yaw = mc.player.rotationYaw;\r\n            pitch = mc.player.rotationPitch;\r\n        }\r\n    }\r\n\r\n    public boolean check_pause() {\r\n        if (find_crystals_hotbar() == -1 && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {\r\n            return true;\r\n        }\r\n\r\n        if (inhibit.get_value(true)) {\r\n            if (attack_swings > inhibit_swings.get_value(1)) {\r\n                if (inhibit_delay_counter > inhibit_delay.get_value(1)) {\r\n                    attack_swings = 0;\r\n                    inhibit_delay_counter = 0;\r\n                } else {\r\n                    if (old_render.get_value(true)) {\r\n                        render_block_init = null;\r\n                    }\r\n                    inhibit_delay_counter++;\r\n                    EntityEnderCrystal crystal = get_best_crystal();\r\n                    if (sync.in(\"Inhibit\") && crystal != null) {\r\n                        crystal.setDead();\r\n                    }\r\n                    return true;\r\n                }\r\n            }\r\n        }\r\n\r\n        if (stop_while_mining.get_value(true) && mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof ItemPickaxe) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n        if (stop_while_eating.get_value(true) && PlayerUtil.IsEating()) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (min_health_pause.get_value(true) && (mc.player.getHealth()+mc.player.getAbsorptionAmount()) < required_health.get_value(1)) {\r\n            return true;\r\n        }\r\n\r\n        if (AntiTrap.is_trapped && Ozark.get_module_manager().get_module_with_tag(\"AntiTrap\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (Ozark.get_module_manager().get_module_with_tag(\"Surround\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (Ozark.get_module_manager().get_module_with_tag(\"HoleFill\").is_active() && !Ozark.get_setting_manager().get_setting_with_tag(\"HoleFill\", \"HoleFillSmart\").get_value(true) && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (Ozark.get_module_manager().get_module_with_tag(\"Trap\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (Ozark.get_module_manager().get_module_with_tag(\"AutoAnvil\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (Ozark.get_module_manager().get_module_with_tag(\"PistonCrystal\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (AntiTrap.is_trapped && Ozark.get_module_manager().get_module_with_tag(\"AntiTrap\").is_active() && module_check.get_value(true)) {\r\n            if (old_render.get_value(true)) {\r\n                render_block_init = null;\r\n            }\r\n            return true;\r\n        }\r\n\r\n        return false;\r\n    }\r\n\r\n    public EntityPlayer get_closest_target()  {\r\n        if (mc.world.playerEntities.isEmpty())\r\n            return null;\r\n\r\n        EntityPlayer closestTarget = null;\r\n\r\n        for (final EntityPlayer target : mc.world.playerEntities)\r\n        {\r\n            if (target == mc.player)\r\n                continue;\r\n\r\n            if (FriendUtil.isFriend(target.getName()))\r\n                continue;\r\n\r\n            if (!EntityUtil.isLiving(target))\r\n                continue;\r\n\r\n            if (target.getHealth() <= 0.0f)\r\n                continue;\r\n\r\n            if (target.getDistance(mc.player) >= player_range.get_value(1)) continue;\r\n\r\n            if (closestTarget != null)\r\n                if (mc.player.getDistance(target) > mc.player.getDistance(closestTarget))\r\n                    continue;\r\n\r\n            closestTarget = target;\r\n        }\r\n\r\n        return closestTarget;\r\n    }\r\n\r\n    public void handle_rotations(boolean target, BlockPos pos, EntityEnderCrystal crystal) {\r\n        if (target && crystal == null) return;\r\n        if (!target && pos == null) return;\r\n        if (rotate_mode.in(\"Off\")) return;\r\n        if (debug.get_value(true)) {\r\n            if (target) {\r\n                MessageUtil.send_client_message(\"Rotating to crystal\");\r\n            } else {\r\n                MessageUtil.send_client_message(\"Rotating to block\");\r\n            }\r\n        }\r\n\r\n        if (ca_target != null) {\r\n            float yaw;\r\n            float pitch;\r\n            if (target) {\r\n                yaw = RotationUtil.getAngles(crystal)[0];\r\n                pitch = RotationUtil.getAngles(crystal)[1];\r\n            } else {\r\n                yaw = RotationUtil.getPositionAngles(pos)[0];\r\n                pitch = RotationUtil.getPositionAngles(pos)[1];\r\n            }\r\n\r\n            if (pitch == this.pitch && yaw == this.yaw && !anti_waste.get_value(true)) return;\r\n\r\n            if (rotate_mode.in(\"Off\")) {\r\n                ca_rotation = new RotationUtil.Rotation(0, 0, RotationUtil.RotationMode.None, RotationUtil.RotationPriority.Lowest);\r\n            } else if (rotate_mode.in(\"Packet\")) {\r\n                ca_rotation = new RotationUtil.Rotation(yaw, pitch, RotationUtil.RotationMode.Packet, RotationUtil.RotationPriority.Highest);\r\n            } else if (rotate_mode.in(\"Seizure\")) {\r\n                ca_rotation = new RotationUtil.Rotation(yaw, pitch, RotationUtil.RotationMode.Legit, RotationUtil.RotationPriority.Highest);\r\n            }\r\n        }\r\n\r\n        if (!limiter.in(\"None\") && Ozark.get_rotation_manager().serverRotation != null)\r\n            ca_rotation = RotationUtil.rotationStep(Ozark.get_rotation_manager().serverRotation, ca_rotation, (float) (((random_rotate.get_value(true) ? Math.random() : 1) * (max_angle.get_value(1d) - min_angle.get_value(1d))) + min_angle.get_value(1)), limiter);\r\n\r\n        if (queue.get_value(true)) {\r\n            Ozark.get_rotation_manager().rotationQueue.add(ca_rotation);\r\n        } else {\r\n            Ozark.get_rotation_manager().setCurrentRotation(ca_rotation);\r\n        }\r\n\r\n    }\r\n\r\n    @Override\r\n    public void render(EventRender event) {\r\n        if (render_block_init == null) return;\r\n\r\n        boolean render_render = outline.get_value(true) || solid.get_value(true) || glow_solid.get_value(true) || glow_outline.get_value(true);\r\n\r\n        if (!render_render) return;\r\n\r\n        render_block(render_block_init);\r\n\r\n        if (future_render.get_value(true) && render_block_old != null) {\r\n            render_block(render_block_old);\r\n        }\r\n\r\n        if (!render_damage.in(\"None\")) {\r\n            try {\r\n                RenderUtil.drawText(render_block_init, ((Math.floor(this.render_damage_value) == this.render_damage_value) ? Integer.valueOf((int)this.render_damage_value) : String.format(\"%.1f\", this.render_damage_value)) + \"\");\r\n            } catch (Exception ignored) {}\r\n        }\r\n\r\n    }\r\n\r\n    public void render_block(BlockPos pos) {\r\n        BlockPos render_block = (top_block.get_value(true) ? pos.up() : pos);\r\n\r\n        float h = (float) height.get_value(1.0);\r\n\r\n        if (solid.get_value(true)) {\r\n            RenderHelp.prepare(\"quads\");\r\n            RenderHelp.draw_cube(RenderHelp.get_buffer_build(),\r\n                    render_block.getX(), render_block.getY(), render_block.getZ(),\r\n                    1, h, 1,\r\n                    r.get_value(1), g.get_value(1), b.get_value(1), a.get_value(1),\r\n                    \"all\"\r\n            );\r\n            RenderHelp.release();\r\n        }\r\n\r\n        if (outline.get_value(true)) {\r\n            RenderHelp.prepare(\"lines\");\r\n            RenderHelp.draw_cube_line(RenderHelp.get_buffer_build(),\r\n                    render_block.getX(), render_block.getY(), render_block.getZ(),\r\n                    1, h, 1,\r\n                    r.get_value(1), g.get_value(1), b.get_value(1), a_out.get_value(1),\r\n                    \"all\"\r\n            );\r\n            RenderHelp.release();\r\n        }\r\n        if (glow_solid.get_value(true)) {\r\n\r\n            RenderHelp.prepare(\"quads\");\r\n            RenderHelp.draw_gradiant_cube(RenderHelp.get_buffer_build(),\r\n                    render_block.getX(), render_block.getY(), render_block.getZ(),\r\n                    1, h, 1,  new Color(r.get_value(1), g.get_value(1), b.get_value(1), a.get_value(1)),\r\n                    new Color(0, 0, 0, glow_a.get_value(1)),\r\n                    \"all\"\r\n            );\r\n            RenderHelp.release();\r\n        }\r\n\r\n        if (glow_outline.get_value(true)) {\r\n            RenderHelp.prepare(\"lines\");\r\n            RenderHelp.draw_gradiant_outline(RenderHelp.get_buffer_build(),\r\n                    render_block.getX(), render_block.getY(), render_block.getZ(),\r\n                    h, new Color(r.get_value(1), g.get_value(1), b.get_value(1), a_out.get_value(1)),\r\n                    new Color(0, 0, 0, glow_a_out.get_value(1)),\r\n                    \"all\"\r\n            );\r\n            RenderHelp.release();\r\n        }\r\n    }\r\n\r\n    @EventHandler\r\n    private final Listener<EventEntityRemoved> on_entity_removed = new Listener<>(event -> {\r\n        if (event.get_entity() instanceof EntityEnderCrystal) {\r\n            attacked_crystals.remove(event.get_entity());\r\n            fake_crystals.remove(event.get_entity());\r\n        }\r\n    });\r\n\r\n    @EventHandler\r\n    private final Listener<EventPacket.ReceivePacket> receive_listener = new Listener<>(event -> {\r\n        if (event.get_packet() instanceof SPacketSoundEffect) {\r\n            final SPacketSoundEffect packet = (SPacketSoundEffect) event.get_packet();\r\n\r\n            if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {\r\n                for (Entity e : mc.world.loadedEntityList) {\r\n                    if (e instanceof EntityEnderCrystal) {\r\n                        if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {\r\n                            if (sync.in(\"Sound\")) {\r\n                                e.setDead();\r\n                            }\r\n                            if (sound_predict.get_value(true)) {\r\n                                if (debug.get_value(true)) {\r\n                                    MessageUtil.send_client_message(\"Sound predicting\");\r\n                                }\r\n                                place_crystal();\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        if (event.get_packet() instanceof SPacketSpawnObject) {\r\n            final SPacketSpawnObject packet = (SPacketSpawnObject) event.get_packet();\r\n            if (packet.getType() == 51 && this.ca_target != null && break_predict.get_value(true)) {\r\n                if (!this.is_predicting_crystal(packet)) {\r\n                    return;\r\n                }\r\n                if (debug.get_value(true)) {\r\n                    MessageUtil.send_client_message(\"break predicting\");\r\n                }\r\n                CPacketUseEntity predict = new CPacketUseEntity();\r\n                predict.entityId = packet.getEntityID();\r\n                predict.action = CPacketUseEntity.Action.ATTACK;\r\n                AutoCrystal.mc.player.connection.sendPacket(predict);\r\n            }\r\n        }\r\n        if (event.get_packet() instanceof SPacketPlayerPosLook && rubberband.get_value(true)) {\r\n            ca_rotation.restoreRotation();\r\n        }\r\n    });\r\n\r\n    @EventHandler\r\n    private final Listener<EventPacket.SendPacket> send_listener = new Listener<>(event -> {\r\n        if (event.get_packet() instanceof CPacketUseEntity && ((CPacketUseEntity) event.get_packet()).getAction() == CPacketUseEntity.Action.ATTACK && ((CPacketUseEntity) event.get_packet()).getEntityFromWorld(mc.world) instanceof EntityEnderCrystal) {\r\n            if (sync.in(\"Attack\"))\r\n                Objects.requireNonNull(((CPacketUseEntity) event.get_packet()).getEntityFromWorld(mc.world)).setDead();\r\n        }\r\n        if (event.get_packet() instanceof CPacketUseEntity && ((CPacketUseEntity) event.get_packet()).getAction() == CPacketUseEntity.Action.ATTACK && ((CPacketUseEntity) event.get_packet()).getEntityFromWorld(mc.world) instanceof EntityEnderCrystal) {\r\n            EntityEnderCrystal predicted_crystal = (EntityEnderCrystal) ((CPacketUseEntity) event.get_packet()).getEntityFromWorld(mc.world);\r\n            if (predicted_crystal != null && place_predict.get_value(true) && ca_target != null) {\r\n                if (is_predicting_block(predicted_crystal)) {\r\n                    boolean offhand_check = false;\r\n                    if (mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {\r\n                        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && !switch_mode.in(\"None\") && !place_crystal.get_value(true)) {\r\n                            if (switch_bind.get_bind(\"\").equalsIgnoreCase(\"None\") || do_switch_bind) {\r\n                                if (switch_mode.in(\"Normal\")) {\r\n                                    mc.player.inventory.currentItem = find_crystals_hotbar();\r\n                                } else {\r\n                                    mc.player.connection.sendPacket(new CPacketHeldItemChange(find_crystals_hotbar()));\r\n                                }\r\n                                return;\r\n                            }\r\n                        }\r\n                    } else {\r\n                        offhand_check = true;\r\n                    }\r\n                    if (debug.get_value(true)) {\r\n                        MessageUtil.send_client_message(\"Place predicting\");\r\n                    }\r\n                    BlockUtil.placeCrystalOnBlock(predicted_crystal.getPosition().down(), offhand_check ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, packet_place.get_value(true));\r\n                }\r\n            }\r\n        }\r\n        if (event.get_packet() instanceof CPacketPlayer && rotate_mode.in(\"Packet\")) {\r\n            final CPacketPlayer p = (CPacketPlayer) event.get_packet();\r\n            yaw = p.yaw;\r\n            pitch = p.pitch;\r\n        }\r\n    });\r\n\r\n    @SubscribeEvent\r\n    public void block_break(BlockEvent.BreakEvent event) {\r\n        if (city_predict.get_value(true)) {\r\n            if (debug.get_value(true)) {\r\n                MessageUtil.send_client_message(\"city predicting\");\r\n            }\r\n            place_crystal();\r\n        }\r\n    }\r\n\r\n    private boolean is_predicting_crystal(SPacketSpawnObject packet) {\r\n        BlockPos packPos = new BlockPos(packet.getX(), packet.getY(), packet.getZ());\r\n        if (AutoCrystal.mc.player.getDistance(packet.getX(), packet.getY(), packet.getZ()) > (double) this.hit_range.get_value(1)) {\r\n            return false;\r\n        }\r\n        if (!BlockUtil.canSeeBlock(packPos) && AutoCrystal.mc.player.getDistance(packet.getX(), packet.getY(), packet.getZ()) > (double) this.hit_range_wall.get_value(1)) {\r\n            return false;\r\n        }\r\n        double targetDmg = CrystalUtil.calculateDamage(packet.getX() + 0.5, packet.getY() + 1.0, packet.getZ() + 0.5, this.ca_target);\r\n        if (EntityUtil.isInHole(AutoCrystal.mc.player) && targetDmg >= 1.0) {\r\n            return true;\r\n        }\r\n        double selfDmg = CrystalUtil.calculateDamage(packet.getX() + 0.5, packet.getY() + 1.0, packet.getZ() + 0.5, AutoCrystal.mc.player);\r\n        double d = anti_suicide.get_value(true) ? 2.0 : 0.5;\r\n        if (get_armor_fucker(ca_target) && !get_armor_fucker(mc.player)) {\r\n            return true;\r\n        }\r\n        if (selfDmg + d < (double) (AutoCrystal.mc.player.getHealth() + AutoCrystal.mc.player.getAbsorptionAmount()) && targetDmg >= (double) (this.ca_target.getAbsorptionAmount() + this.ca_target.getHealth())) {\r\n            return true;\r\n        }\r\n        if (targetDmg >= (double) this.min_player_break.get_value(1) && selfDmg <= (double) this.max_self_damage.get_value(1)) {\r\n            return true;\r\n        }\r\n        return faceplace_mode.get_value(true) && EntityUtil.isInHole(this.ca_target) && this.ca_target.getHealth() + this.ca_target.getAbsorptionAmount() <= this.faceplace_mode.get_value(1);\r\n    }\r\n\r\n    private boolean is_predicting_block(EntityEnderCrystal crystal) {\r\n        BlockPos packPos = new BlockPos(crystal.posX, crystal.posY, crystal.posZ);\r\n        if (AutoCrystal.mc.player.getDistance(crystal.posX, crystal.posY, crystal.posZ) > (double) this.hit_range.get_value(1)) {\r\n            return false;\r\n        }\r\n        if (!BlockUtil.canSeeBlock(packPos) && AutoCrystal.mc.player.getDistance(crystal.posX, crystal.posY, crystal.posZ) > (double) this.hit_range_wall.get_value(1)) {\r\n            return false;\r\n        }\r\n        double targetDmg = CrystalUtil.calculateDamage(crystal.posX + 0.5, crystal.posY + 1.0, crystal.posZ + 0.5, this.ca_target);\r\n        if (EntityUtil.isInHole(AutoCrystal.mc.player) && targetDmg >= 1.0) {\r\n            return true;\r\n        }\r\n        double selfDmg = CrystalUtil.calculateDamage(crystal.posX + 0.5, crystal.posY + 1.0, crystal.posZ + 0.5, AutoCrystal.mc.player);\r\n        double d = anti_suicide.get_value(true) ? 2.0 : 0.5;\r\n        if (get_armor_fucker(ca_target) && !get_armor_fucker(mc.player)) {\r\n            return true;\r\n        }\r\n        if (selfDmg + d < (double) (AutoCrystal.mc.player.getHealth() + AutoCrystal.mc.player.getAbsorptionAmount()) && targetDmg >= (double) (this.ca_target.getAbsorptionAmount() + this.ca_target.getHealth())) {\r\n            return true;\r\n        }\r\n        if (targetDmg >= (double) this.min_player_break.get_value(1) && selfDmg <= (double) this.max_self_damage.get_value(1)) {\r\n            return true;\r\n        }\r\n        return faceplace_mode.get_value(true) && EntityUtil.isInHole(this.ca_target) && this.ca_target.getHealth() + this.ca_target.getAbsorptionAmount() <= this.faceplace_mode.get_value(1);\r\n    }\r\n\r\n    public void cycle_rainbow() {\r\n        float[] tick_color = {\r\n                (System.currentTimeMillis() % (360 * 32)) / (360f * 32)\r\n        };\r\n\r\n        int color_rgb_o = Color.HSBtoRGB(tick_color[0], sat.get_value(1), brightness.get_value(1));\r\n\r\n        r.set_value((color_rgb_o >> 16) & 0xFF);\r\n        g.set_value((color_rgb_o >> 8) & 0xFF);\r\n        b.set_value(color_rgb_o & 0xFF);\r\n    }\r\n\r\n    private int find_crystals_hotbar() {\r\n        for (int i = 0; i < 9; i++) {\r\n            if (mc.player.inventory.getStackInSlot(i).getItem() == Items.END_CRYSTAL) {\r\n                return i;\r\n            }\r\n        }\r\n        return -1;\r\n    }\r\n\r\n    private void add_attacked_crystal(EntityEnderCrystal crystal) {\r\n        if (crystal == null) return;\r\n        if (attacked_crystals.containsKey(crystal)) {\r\n            int value = attacked_crystals.get(crystal);\r\n            attacked_crystals.put(crystal, value + 1);\r\n        } else {\r\n            attacked_crystals.put(crystal, 1);\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void enable() {\r\n\r\n        inhibit_delay_counter = 0;\r\n        attack_swings = 0;\r\n        place_timeout_flag = false;\r\n        ca_target = null;\r\n        anti_stuck_timer.reset();\r\n        detail_name = null;\r\n        detail_hp = 20;\r\n\r\n       \r\n    }\r\n\r\n    @Override\r\n    public void disable() {\r\n        render_block_init = null;\r\n        ca_target = null;\r\n        Ozark.TARGET_NAME = \"NULL\";\r\n        if (ca_rotation != null) {\r\n            ca_rotation.restoreRotation();\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void on_bind(String tag) {\r\n        if (tag.equals(\"CaSwitchBind\")) {\r\n            do_switch_bind = !do_switch_bind;\r\n        }\r\n        if (tag.equals(\"CaFaceBind\")) {\r\n            face_place_bind = !face_place_bind;\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void update_always() {\r\n        // PLACE\r\n        place_crystal.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")));\r\n        place_trys.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        place_range.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        place_range_wall.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        place_delay.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        min_player_place.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        packet_place.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        endcrystal.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        momentum.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        multi_place.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        faceplace_mode.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        faceplace_mode_damage.set_shown(faceplace_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        faceplace_check.set_shown(faceplace_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        heuristic.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        heuristic_min_health.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true) && !heuristic.in(\"Damage\"));\r\n        fast_place.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        sound_predict.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        motion_predict.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        verify_place.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        city_predict.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        switch_mode.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")) && place_crystal.get_value(true));\r\n        place_predict.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")));\r\n        ignore_web.set_shown((!clean_mode.get_value(true) || setting.in(\"Place\")));\r\n\r\n        // BREAK\r\n        break_crystal.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")));\r\n        break_trys.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        break_predict.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")));\r\n        break_all.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        swing.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        packet_break.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        min_player_break.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        break_delay.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        hit_range.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        hit_range_wall.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n        anti_weakness.set_shown((!clean_mode.get_value(true) || setting.in(\"Break\")) && break_crystal.get_value(true));\r\n\r\n        // PLACE & BREAK\r\n        target_mode.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        anti_suicide.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        alternative.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        player_range.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        raytrace.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        fast_mode.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        sync.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        anti_stuck.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        anti_stuck_time.set_shown(anti_stuck.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place & Break\")));\r\n        anti_stuck_tries.set_shown(anti_stuck.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place & Break\")));\r\n        fuck_armor_mode.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n        fuck_armor_mode_precent.set_shown(fuck_armor_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place & Break\")));\r\n        fuck_armor_mode_precent_self.set_shown(fuck_armor_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Place & Break\")));\r\n        max_self_damage.set_shown(!clean_mode.get_value(true) || setting.in(\"Place & Break\"));\r\n\r\n        // ROTATIONS\r\n        rotate_mode.set_shown(!clean_mode.get_value(true) || setting.in(\"Rotations\"));\r\n        limiter.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        rotate_during.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        max_angle.set_shown(!rotate_mode.in(\"Off\") && !limiter.in(\"None\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        min_angle.set_shown(!rotate_mode.in(\"Off\") && !limiter.in(\"None\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        random_rotate.set_shown(!rotate_mode.in(\"Off\") && !limiter.in(\"None\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        rubberband.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        anti_waste.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        quick_restore.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        queue.set_shown(!rotate_mode.in(\"Off\") && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n        accurate.set_shown(!rotate_mode.in(\"Off\") && queue.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Rotations\")));\r\n\r\n        // PAUSE\r\n        inhibit.set_shown(!clean_mode.get_value(true) || setting.in(\"Pause\"));\r\n        inhibit_delay.set_shown(inhibit.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Pause\")));\r\n        inhibit_swings.set_shown(inhibit.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Pause\")));\r\n        module_check.set_shown(!clean_mode.get_value(true) || setting.in(\"Pause\"));\r\n        min_health_pause.set_shown(!clean_mode.get_value(true) || setting.in(\"Pause\"));\r\n        required_health.set_shown(min_health_pause.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Pause\")));\r\n        stop_while_mining.set_shown(!clean_mode.get_value(true) || setting.in(\"Pause\"));\r\n        stop_while_eating.set_shown(!clean_mode.get_value(true) || setting.in(\"Pause\"));\r\n\r\n        // RENDER\r\n        boolean render_render = outline.get_value(true) || solid.get_value(true) || glow_solid.get_value(true) || glow_outline.get_value(true);\r\n        old_render.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        future_render.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        top_block.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        r.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        g.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        b.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        a.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        a_out.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        rainbow_mode.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        sat.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        brightness.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        height.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        render_damage.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        rainbow_mode.set_shown(render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        sat.set_shown(rainbow_mode.get_value(true) && render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        brightness.set_shown(rainbow_mode.get_value(true) && render_render && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        a.set_shown((solid.get_value(true) || glow_solid.get_value(true)) && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        a_out.set_shown((outline.get_value(true) || glow_outline.get_value(true)) && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        glow_a.set_shown(glow_solid.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n        glow_a_out.set_shown(glow_outline.get_value(true) && (!clean_mode.get_value(true) || setting.in(\"Render\")));\r\n\r\n\r\n        // MISC\r\n        debug.set_shown(!clean_mode.get_value(true) || setting.in(\"Misc\"));\r\n        switch_bind.set_shown(!clean_mode.get_value(true) || setting.in(\"Misc\"));\r\n        faceplace_bind.set_shown(!clean_mode.get_value(true) || setting.in(\"Misc\"));\r\n        clean_mode.set_shown(!clean_mode.get_value(true) || setting.in(\"Misc\"));\r\n        setting.set_shown(clean_mode.get_value(true));\r\n    }\r\n\r\n    @Override\r\n    public void log_out() {\r\n        this.set_disable();\r\n    }\r\n\r\n    @Override\r\n    public String array_detail() {\r\n        return (detail_name != null) ? detail_name + \" | \" + detail_hp : \"None\";\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/module/combat/AutoCrystal.java b/src/main/java/me/trambled/ozark/ozarkclient/module/combat/AutoCrystal.java
+--- a/src/main/java/me/trambled/ozark/ozarkclient/module/combat/AutoCrystal.java	(revision d55a6856d1c814f0dd80b1a4e32c708dd660d1f4)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/module/combat/AutoCrystal.java	(date 1622643243034)
+@@ -48,20 +48,19 @@
+         this.tag         = "AutoCrystal";
+         this.description = "Kills people (if ur good).";
+     }
+-
+-    Setting setting = create("Setting", "CaSetting", "Place", combobox("Place", "Break", "Place & Break", "Rotations", "Pause", "Render", "Misc"));
+-    Setting debug = create("Debug", "CaDebug", false);
+-    Setting place_crystal = create("Place", "CaPlace", true);
+-    Setting break_crystal = create("Break", "CaBreak", true);
+-    Setting anti_weakness = create("Anti-Weakness", "CaAntiWeakness", true);
+-    Setting alternative = create("Alternative", "CaAlternative", false);
+-    Setting module_check = create("Module Check", "CaModuleCheck", true);
+-    Setting break_predict = create("Break Predict", "CaBreakPredict", true);
+-    Setting place_predict = create("Place Predict", "CaPlacePredict", false);
++    Setting debug = create("Debug", "CaDebug", false); 
++    Setting place_crystal = create("Place", "CaPlace", true); 
++    Setting break_crystal = create("Break", "CaBreak", true); 
++    Setting anti_weakness = create("Anti-Weakness", "CaAntiWeakness", true); 
++    Setting alternative = create("Alternative", "CaAlternative", false); 
++    Setting module_check = create("Module Check", "CaModuleCheck", true); 
++    Setting break_predict = create("Break Predict", "CaBreakPredict", true); 
++    Setting place_predict = create("Place Predict", "CaPlacePredict", false); 
+     Setting sound_predict = create("Sound Predict", "CaSoundPredict", true);
+     Setting city_predict = create("City Predict", "CaCityPredict", true);
+ 
+     Setting motion_predict = create("Motion Predict", "CaMotionPredict", true);
++    Setting motion_predict_factor = create("Motion Factor", "CaMotionPredictFactor", 1f, 0f, 2f);
+     Setting verify_place = create("Verify Place", "CaVerifyPlace", false);
+ 
+     Setting inhibit = create("Inhibit", "CaInhibit", true);
+@@ -87,6 +86,7 @@
+     Setting required_health = create("Required Health", "CaRequiredHealth", 1, 1, 36);
+     
+     Setting ignore_web = create("Ignore Webs", "CaWebIgnore", true);
++    Setting ignore_terrain = create("Ignore Terrain", "CaTerrainIgnore", false);
+ 
+     Setting packet_place = create("Packet Place", "CaPacketPlace", true);
+     Setting packet_break = create("Packet Break", "CaPacketBreak", true);
+@@ -137,10 +137,7 @@
+     Setting rubberband = create("Detect Rubberband", "CaRotateDetectRubberband", true);
+     Setting quick_restore = create("Quick Restore", "CaRestoreRotationInstant", false);
+ 
+-    Setting solid = create("Solid", "CaSolid", true);
+-    Setting outline = create("Outline", "CaOutline", true);
+-    Setting glow_solid = create("Glow Solid", "CaGlowSolid", false);
+-    Setting glow_outline = create("Glow Outline", "CaGlowOutline", false);
++    Setting render_mode = create("Render", "CaRenderMode", "Glow", combobox("Pretty", "Solid", "Outline", "Glow", "Glow 2", "None", "GlowOutline", "GlowPretty", "GlowSolid"));
+     Setting old_render = create("Old Render", "CaOldRender", false);
+     Setting future_render = create("Future Render", "CaFutureRender", false);
+     Setting top_block = create("Top Block", "CaTopBlock", false);
+@@ -157,7 +154,6 @@
+     Setting height = create("Height", "CaHeight", 1.0, 0.0, 1.0);
+     Setting render_damage = create("Render Damage", "CaRenderDamage", "Normal", combobox("Normal", "Heuristic", "None"));
+ 
+-    Setting clean_mode = create("Clean Settings", "CaCleanMode", true);
+     Setting switch_bind = create("Switch Bind", "CaSwitchBind", 0);
+     Setting faceplace_bind = create("Faceplace Bind", "CaFaceBind", 0);
+ 
+@@ -185,6 +181,10 @@
+     private boolean do_switch_bind = false;
+     private boolean face_place_bind = false;
+     private boolean did_anything;
++    private boolean outline;
++    private boolean solid;
++    private boolean glow;
++    private boolean glowLines;
+ 
+     private int place_timeout;
+     private int break_timeout;
+@@ -306,7 +306,7 @@
+         }
+ 
+         if (rotate_during.in("Both") || rotate_during.in("Place")) {
+-            handle_rotations(false, target_block, null);
++            handle_rotations(false);
+         }
+ 
+         did_anything = true;
+@@ -314,7 +314,7 @@
+             BlockUtil.placeCrystalOnBlock(target_block, offhand_check ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, packet_place.get_value(true));
+         }
+         if (sync.in("Semi")) {
+-            EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) target_block.getX() + 0.5, (double) target_block.getY() + 1, (double) target_block.getZ() + 0.5);
++            EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) get_best_block().getX() + 0.5, (double) get_best_block().getY() + 1, (double) get_best_block().getZ() + 0.5);
+             mc.world.addEntityToWorld(-101, crystal);
+             crystal.setInvisible(true);
+             fake_crystals.add(crystal);
+@@ -377,7 +377,7 @@
+         did_anything = true;
+ 
+         if (rotate_during.in("Break") || rotate_during.in("Both")) {
+-            handle_rotations(true, null, crystal);
++            handle_rotations(true);
+         }
+ 
+         for (int i = 0; i < break_trys.get_value(1); i++) {
+@@ -409,14 +409,13 @@
+                 return;
+             }
+         }
+-        BlockPos block = get_best_block();
+-        if (block == null) return;
++        if (get_best_block() == null) return;
+         if (mc.world == null) return;
+         if (mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL) return;
+         if (debug.get_value(true)) {
+             MessageUtil.send_client_message("Doing fake crystal");
+         }
+-        EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) block.getX() + 0.5, (double) block.getY() + 1, (double) block.getZ() + 0.5);
++        EntityEnderCrystal crystal = new EntityEnderCrystal(mc.world,(double) get_best_block().getX() + 0.5, (double) get_best_block().getY() + 1, (double) get_best_block().getZ() + 0.5);
+         mc.world.addEntityToWorld(-101, crystal);
+         crystal.setDead();
+         if (mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL) {
+@@ -446,13 +445,8 @@
+ 
+         BlockPos best_block = null;
+ 
+-        List<BlockPos> blocks;
+-
+-        if (momentum.get_value(true)) {
+-            blocks = CrystalUtil.crystalBlocksMomentum(mc.player, place_range.get_value(1), motion_predict.get_value(true), 1, !multi_place.get_value(true), endcrystal.get_value(true));
+-        } else {
+-            blocks = CrystalUtil.possiblePlacePositions(place_range.get_value(1), endcrystal.get_value(true), !multi_place.get_value(true));
+-        }
++        List<BlockPos> blocks_momentum = CrystalUtil.crystalBlocksMomentum(mc.player, place_range.get_value(1), motion_predict.get_value(true), motion_predict_factor.get_value(1), !multi_place.get_value(true), endcrystal.get_value(true));
++        List<BlockPos> blocks = CrystalUtil.possiblePlacePositions(place_range.get_value(1), endcrystal.get_value(true), !multi_place.get_value(true));
+ 
+         for (Entity player : mc.world.playerEntities) {
+ 
+@@ -460,7 +454,7 @@
+                 if (FriendUtil.isFriend(player.getName())) continue;
+             }
+ 
+-            for (BlockPos block : blocks) {
++            for (BlockPos block : momentum.get_value(true) ? blocks_momentum : blocks) {
+ 
+                 if (player.getDistance(mc.player) >= player_range.get_value(1)) continue;
+ 
+@@ -498,7 +492,11 @@
+                 
+                 if (ignore_web.get_value(true) && mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.WEB) {
+                     mc.world.setBlockToAir(EntityUtil.getRoundedBlockPos(target));
+-                }
++                }   
++                
++                if (ignore_terrain.get_value(true) && !(mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.OBSIDIAN || mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.BEDROCK) || mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.BARRIER || mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.ENCHANTING_TABLE || mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.ENDER_CHEST || mc.world.getBlockState(EntityUtil.getRoundedBlockPos(target)).getBlock() == Blocks.ANVIL) {
++                     mc.world.setBlockToAir(EntityUtil.getRoundedBlockPos(target));
++                }   
+ 
+                 double target_damage = CrystalUtil.calculateDamage((double) block.getX() + 0.5, (double) block.getY() + 1, (double) block.getZ() + 0.5, target);
+ 
+@@ -689,9 +687,8 @@
+                         render_block_init = null;
+                     }
+                     inhibit_delay_counter++;
+-                    EntityEnderCrystal crystal = get_best_crystal();
+-                    if (sync.in("Inhibit") && crystal != null) {
+-                        crystal.setDead();
++                    if (sync.in("Inhibit") && get_best_crystal() != null) {
++                        get_best_crystal().setDead();
+                     }
+                     return true;
+                 }
+@@ -799,9 +796,9 @@
+         return closestTarget;
+     }
+ 
+-    public void handle_rotations(boolean target, BlockPos pos, EntityEnderCrystal crystal) {
+-        if (target && crystal == null) return;
+-        if (!target && pos == null) return;
++    public void handle_rotations(boolean target) {
++        if (target && get_best_crystal() == null) return;
++        if (!target && get_best_block() == null) return;
+         if (rotate_mode.in("Off")) return;
+         if (debug.get_value(true)) {
+             if (target) {
+@@ -812,24 +809,27 @@
+         }
+ 
+         if (ca_target != null) {
+-            float yaw;
+-            float pitch;
++            float crystal_yaw = 0;
++            float crystal_pitch = 0;
++            float block_yaw = 0;
++            float block_pitch = 0;
+             if (target) {
+-                yaw = RotationUtil.getAngles(crystal)[0];
+-                pitch = RotationUtil.getAngles(crystal)[1];
++                crystal_yaw = RotationUtil.getAngles(get_best_crystal())[0];
++                crystal_pitch = RotationUtil.getAngles(get_best_crystal())[1];
+             } else {
+-                yaw = RotationUtil.getPositionAngles(pos)[0];
+-                pitch = RotationUtil.getPositionAngles(pos)[1];
++                block_yaw = RotationUtil.getPositionAngles(get_best_block())[0];
++                block_pitch = RotationUtil.getPositionAngles(get_best_block())[1];
+             }
+ 
+-            if (pitch == this.pitch && yaw == this.yaw && !anti_waste.get_value(true)) return;
++            if (target && crystal_pitch == pitch && crystal_yaw == yaw && anti_waste.get_value(true)) return;
++            if (!target && block_pitch == pitch && block_yaw == yaw && anti_waste.get_value(true)) return;
+ 
+             if (rotate_mode.in("Off")) {
+                 ca_rotation = new RotationUtil.Rotation(0, 0, RotationUtil.RotationMode.None, RotationUtil.RotationPriority.Lowest);
+             } else if (rotate_mode.in("Packet")) {
+-                ca_rotation = new RotationUtil.Rotation(yaw, pitch, RotationUtil.RotationMode.Packet, RotationUtil.RotationPriority.Highest);
++                ca_rotation = new RotationUtil.Rotation((target ? crystal_yaw : block_yaw), (target ? crystal_pitch : block_pitch), RotationUtil.RotationMode.Packet, RotationUtil.RotationPriority.Highest);
+             } else if (rotate_mode.in("Seizure")) {
+-                ca_rotation = new RotationUtil.Rotation(yaw, pitch, RotationUtil.RotationMode.Legit, RotationUtil.RotationPriority.Highest);
++                ca_rotation = new RotationUtil.Rotation((target ? crystal_yaw : block_yaw), (target ? crystal_pitch : block_pitch), RotationUtil.RotationMode.Legit, RotationUtil.RotationPriority.Highest);
+             }
+         }
+ 
+@@ -848,9 +848,60 @@
+     public void render(EventRender event) {
+         if (render_block_init == null) return;
+ 
+-        boolean render_render = outline.get_value(true) || solid.get_value(true) || glow_solid.get_value(true) || glow_outline.get_value(true);
++        if (render_mode.in("None")) return;
++
++        if (render_mode.in("Pretty")) {
++            outline = true;
++            solid = true;
++            glow = false;
++            glowLines = false;
++        }
++
++        if (render_mode.in("Solid")) {
++            outline = false;
++            solid = true;
++            glow = false;
++            glowLines = false;
++        }
++
++        if (render_mode.in("Outline")) {
++            outline = true;
++            solid = false;
++            glow = false;
++            glowLines = false;
++        }
+ 
+-        if (!render_render) return;
++        if (render_mode.in("Glow")) {
++            outline = false;
++            solid = false;
++            glow = true;
++            glowLines = false;
++        }
++
++        if (render_mode.in("Glow 2")) {
++            outline = false;
++            solid = false;
++            glow = true;
++            glowLines = true;
++        }
++        if (render_mode.in("GlowOutline")) {
++            outline = false;
++            solid = false;
++            glow = false;
++            glowLines = true;
++        }
++        if (render_mode.in("GlowPretty")) {
++            outline = true;
++            solid = false;
++            glow = true;
++            glowLines = false;
++        }
++        if (render_mode.in("GlowSolid")) {
++            outline = false;
++            solid = true;
++            glow = false;
++            glowLines = true;
++        }
+ 
+         render_block(render_block_init);
+ 
+@@ -871,7 +922,7 @@
+ 
+         float h = (float) height.get_value(1.0);
+ 
+-        if (solid.get_value(true)) {
++        if (solid) {
+             RenderHelp.prepare("quads");
+             RenderHelp.draw_cube(RenderHelp.get_buffer_build(),
+                     render_block.getX(), render_block.getY(), render_block.getZ(),
+@@ -882,7 +933,7 @@
+             RenderHelp.release();
+         }
+ 
+-        if (outline.get_value(true)) {
++        if (outline) {
+             RenderHelp.prepare("lines");
+             RenderHelp.draw_cube_line(RenderHelp.get_buffer_build(),
+                     render_block.getX(), render_block.getY(), render_block.getZ(),
+@@ -892,8 +943,15 @@
+             );
+             RenderHelp.release();
+         }
+-        if (glow_solid.get_value(true)) {
+-
++        if (glow) {
++            RenderHelp.prepare("lines");
++            RenderHelp.draw_cube_line(RenderHelp.get_buffer_build(),
++                    render_block.getX(), render_block.getY(), render_block.getZ(),
++                    1, 0, 1,
++                    r.get_value(1), g.get_value(1), b.get_value(1), a_out.get_value(1),
++                    "all"
++            );
++            RenderHelp.release();
+             RenderHelp.prepare("quads");
+             RenderHelp.draw_gradiant_cube(RenderHelp.get_buffer_build(),
+                     render_block.getX(), render_block.getY(), render_block.getZ(),
+@@ -904,7 +962,7 @@
+             RenderHelp.release();
+         }
+ 
+-        if (glow_outline.get_value(true)) {
++        if (glowLines) {
+             RenderHelp.prepare("lines");
+             RenderHelp.draw_gradiant_outline(RenderHelp.get_buffer_build(),
+                     render_block.getX(), render_block.getY(), render_block.getZ(),
+@@ -1110,8 +1168,6 @@
+         anti_stuck_timer.reset();
+         detail_name = null;
+         detail_hp = 20;
+-
+-       
+     }
+ 
+     @Override
+@@ -1119,9 +1175,6 @@
+         render_block_init = null;
+         ca_target = null;
+         Ozark.TARGET_NAME = "NULL";
+-        if (ca_rotation != null) {
+-            ca_rotation.restoreRotation();
+-        }
+     }
+ 
+     @Override
+@@ -1136,113 +1189,44 @@
+ 
+     @Override
+     public void update_always() {
+-        // PLACE
+-        place_crystal.set_shown((!clean_mode.get_value(true) || setting.in("Place")));
+-        place_trys.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        place_range.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        place_range_wall.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        place_delay.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        min_player_place.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        packet_place.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        endcrystal.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        momentum.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        multi_place.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        faceplace_mode.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        faceplace_mode_damage.set_shown(faceplace_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        faceplace_check.set_shown(faceplace_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        heuristic.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        heuristic_min_health.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true) && !heuristic.in("Damage"));
+-        fast_place.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        sound_predict.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        motion_predict.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        verify_place.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        city_predict.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        switch_mode.set_shown((!clean_mode.get_value(true) || setting.in("Place")) && place_crystal.get_value(true));
+-        place_predict.set_shown((!clean_mode.get_value(true) || setting.in("Place")));
+-        ignore_web.set_shown((!clean_mode.get_value(true) || setting.in("Place")));
+-
+-        // BREAK
+-        break_crystal.set_shown((!clean_mode.get_value(true) || setting.in("Break")));
+-        break_trys.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        break_predict.set_shown((!clean_mode.get_value(true) || setting.in("Break")));
+-        break_all.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        swing.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        packet_break.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        min_player_break.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        break_delay.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        hit_range.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        hit_range_wall.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-        anti_weakness.set_shown((!clean_mode.get_value(true) || setting.in("Break")) && break_crystal.get_value(true));
+-
+-        // PLACE & BREAK
+-        target_mode.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        anti_suicide.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        alternative.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        player_range.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        raytrace.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        fast_mode.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        sync.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        anti_stuck.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        anti_stuck_time.set_shown(anti_stuck.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place & Break")));
+-        anti_stuck_tries.set_shown(anti_stuck.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place & Break")));
+-        fuck_armor_mode.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-        fuck_armor_mode_precent.set_shown(fuck_armor_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place & Break")));
+-        fuck_armor_mode_precent_self.set_shown(fuck_armor_mode.get_value(true) && (!clean_mode.get_value(true) || setting.in("Place & Break")));
+-        max_self_damage.set_shown(!clean_mode.get_value(true) || setting.in("Place & Break"));
+-
+-        // ROTATIONS
+-        rotate_mode.set_shown(!clean_mode.get_value(true) || setting.in("Rotations"));
+-        limiter.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        rotate_during.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        max_angle.set_shown(!rotate_mode.in("Off") && !limiter.in("None") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        min_angle.set_shown(!rotate_mode.in("Off") && !limiter.in("None") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        random_rotate.set_shown(!rotate_mode.in("Off") && !limiter.in("None") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        rubberband.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        anti_waste.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        quick_restore.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        queue.set_shown(!rotate_mode.in("Off") && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-        accurate.set_shown(!rotate_mode.in("Off") && queue.get_value(true) && (!clean_mode.get_value(true) || setting.in("Rotations")));
+-
+-        // PAUSE
+-        inhibit.set_shown(!clean_mode.get_value(true) || setting.in("Pause"));
+-        inhibit_delay.set_shown(inhibit.get_value(true) && (!clean_mode.get_value(true) || setting.in("Pause")));
+-        inhibit_swings.set_shown(inhibit.get_value(true) && (!clean_mode.get_value(true) || setting.in("Pause")));
+-        module_check.set_shown(!clean_mode.get_value(true) || setting.in("Pause"));
+-        min_health_pause.set_shown(!clean_mode.get_value(true) || setting.in("Pause"));
+-        required_health.set_shown(min_health_pause.get_value(true) && (!clean_mode.get_value(true) || setting.in("Pause")));
+-        stop_while_mining.set_shown(!clean_mode.get_value(true) || setting.in("Pause"));
+-        stop_while_eating.set_shown(!clean_mode.get_value(true) || setting.in("Pause"));
+-
+-        // RENDER
+-        boolean render_render = outline.get_value(true) || solid.get_value(true) || glow_solid.get_value(true) || glow_outline.get_value(true);
+-        old_render.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        future_render.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        top_block.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        r.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        g.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        b.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        a.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        a_out.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        rainbow_mode.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        sat.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        brightness.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        height.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        render_damage.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        rainbow_mode.set_shown(render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        sat.set_shown(rainbow_mode.get_value(true) && render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        brightness.set_shown(rainbow_mode.get_value(true) && render_render && (!clean_mode.get_value(true) || setting.in("Render")));
+-        a.set_shown((solid.get_value(true) || glow_solid.get_value(true)) && (!clean_mode.get_value(true) || setting.in("Render")));
+-        a_out.set_shown((outline.get_value(true) || glow_outline.get_value(true)) && (!clean_mode.get_value(true) || setting.in("Render")));
+-        glow_a.set_shown(glow_solid.get_value(true) && (!clean_mode.get_value(true) || setting.in("Render")));
+-        glow_a_out.set_shown(glow_outline.get_value(true) && (!clean_mode.get_value(true) || setting.in("Render")));
+-
+-
+-        // MISC
+-        debug.set_shown(!clean_mode.get_value(true) || setting.in("Misc"));
+-        switch_bind.set_shown(!clean_mode.get_value(true) || setting.in("Misc"));
+-        faceplace_bind.set_shown(!clean_mode.get_value(true) || setting.in("Misc"));
+-        clean_mode.set_shown(!clean_mode.get_value(true) || setting.in("Misc"));
+-        setting.set_shown(clean_mode.get_value(true));
++        inhibit_delay.set_shown(inhibit.get_value(true));
++        inhibit_swings.set_shown(inhibit.get_value(true));
++        old_render.set_shown(!render_mode.in("None"));
++        future_render.set_shown(!render_mode.in("None"));
++        top_block.set_shown(!render_mode.in("None"));
++        r.set_shown(!render_mode.in("None"));
++        g.set_shown(!render_mode.in("None"));
++        b.set_shown(!render_mode.in("None"));
++        a.set_shown(!render_mode.in("None"));
++        a_out.set_shown(!render_mode.in("None"));
++        rainbow_mode.set_shown(!render_mode.in("None"));
++        sat.set_shown(!render_mode.in("None"));
++        brightness.set_shown(!render_mode.in("None"));
++        height.set_shown(!render_mode.in("None"));
++        render_damage.set_shown(!render_mode.in("None"));
++        faceplace_mode_damage.set_shown(faceplace_mode.get_value(true));
++        faceplace_check.set_shown(faceplace_mode.get_value(true));
++        fuck_armor_mode_precent.set_shown(fuck_armor_mode.get_value(true));
++        fuck_armor_mode_precent_self.set_shown(fuck_armor_mode.get_value(true));
++        limiter.set_shown(!rotate_mode.in("Off"));
++        rotate_during.set_shown(!rotate_mode.in("Off"));
++        max_angle.set_shown(!rotate_mode.in("Off") && !limiter.in("None"));
++        min_angle.set_shown(!rotate_mode.in("Off") && !limiter.in("None"));
++        random_rotate.set_shown(!rotate_mode.in("Off") && !limiter.in("None"));
++        rubberband.set_shown(!rotate_mode.in("Off"));
++        anti_waste.set_shown(!rotate_mode.in("Off"));
++        quick_restore.set_shown(!rotate_mode.in("Off"));
++        queue.set_shown(!rotate_mode.in("Off"));
++        accurate.set_shown(!rotate_mode.in("Off") && queue.get_value(true));
++        anti_stuck_time.set_shown(anti_stuck.get_value(true));
++        anti_stuck_tries.set_shown(anti_stuck.get_value(true));
++        motion_predict_factor.set_shown(motion_predict.get_value(true));
++        required_health.set_shown(min_health_pause.get_value(true));
++        rainbow_mode.set_shown(!render_mode.in("None"));
++        sat.set_shown(rainbow_mode.get_value(true) && !render_mode.in("None"));
++        brightness.set_shown(rainbow_mode.get_value(true) && !render_mode.in("None"));
++        a.set_shown(!render_mode.in("Outline") && !render_mode.in("None") );
++        a_out.set_shown(!render_mode.in("Solid") && !render_mode.in("None"));
+     }
+ 
+     @Override
+Index: src/main/java/me/trambled/ozark/ozarkclient/module/chat/Notifier.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/module/chat/Notifier.java b/src/main/java/me/trambled/ozark/ozarkclient/module/chat/Notifier.java
+new file mode 100644
+--- /dev/null	(date 1622643229556)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/module/chat/Notifier.java	(date 1622643229556)
+@@ -0,0 +1,37 @@
++package me.trambled.ozark.ozarkclient.module.chat;
++import me.trambled.ozark.ozarkclient.module.Setting;
++import me.trambled.ozark.ozarkclient.event.events.EventPacket;
++import me.trambled.ozark.ozarkclient.module.Category;
++import me.trambled.ozark.ozarkclient.module.Module;
++import me.trambled.ozark.ozarkclient.util.MessageUtil;
++import net.minecraft.network.play.server.SPacketPlayerPosLook;
++import me.zero.alpine.fork.listener.EventHandler;
++import me.zero.alpine.fork.listener.Listener;
++import com.mojang.realmsclient.gui.ChatFormatting;
++import net.minecraft.network.play.client.*;
++import net.minecraft.network.play.server.*;
++
++
++public final class Notifier extends Module {
++
++    public Notifier() {
++        super(Category.CHAT);
++
++        this.name = "Notifier";
++        this.tag = "Notifier";
++        this.description = "Notifies you SHIT OKAY";
++    }
++
++    Setting rubberband = create("Rubberband", "Rubberband", true);
++    Setting fps = create("Fps Notifier", "FpsNotifier", 15, 0, 60);
++
++    @EventHandler
++    private final Listener<EventPacket.ReceivePacket> receive_listener = new Listener<>(event -> {
++        if (event.get_packet() instanceof SPacketSoundEffect) {
++            final SPacketSoundEffect packet = (SPacketSoundEffect) event.get_packet();
++        }
++        if (event.get_packet() instanceof SPacketPlayerPosLook && rubberband.get_value(true)) {
++            MessageUtil.send_client_message_simple(ChatFormatting.RED + "" + ChatFormatting.BOLD + "Rubberband detected");
++        }
++    });
++}
+Index: src/main/java/me/trambled/ozark/ozarkclient/guiscreen/hud/pinnables/Logo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package me.trambled.ozark.ozarkclient.guiscreen.hud.pinnables;\r\n\r\nimport me.trambled.ozark.ozarkclient.guiscreen.hud.items.Pinnable;\r\nimport me.trambled.ozark.ozarkclient.util.TextureUtil;\r\nimport net.minecraft.util.ResourceLocation;\r\nimport org.lwjgl.opengl.GL11;\r\n\r\npublic class Logo extends Pinnable {\r\n    \r\n    public Logo() {\r\n        super(\"Logo\", \"Logo\", 1, 0, 0);\r\n    }\r\n\r\n    ResourceLocation r = new ResourceLocation(\"custom/logo.png\");\r\n\r\n    @Override\r\n\tpublic void render() {\r\n\r\n\t\tGL11.glPushMatrix();\r\n        GL11.glTranslatef(this.get_x(), this.get_y(), 0.0F);\r\n        TextureUtil.drawTexture(r, this.get_x(), this.get_y(), 460, 425);\r\n        GL11.glPopMatrix();\r\n\r\n\t\tthis.set_width(460);\r\n\t\tthis.set_height(425);\r\n\t}\r\n\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/hud/pinnables/Logo.java b/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/hud/pinnables/Logo.java
+--- a/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/hud/pinnables/Logo.java	(revision d55a6856d1c814f0dd80b1a4e32c708dd660d1f4)
++++ b/src/main/java/me/trambled/ozark/ozarkclient/guiscreen/hud/pinnables/Logo.java	(date 1622643243040)
+@@ -11,7 +11,7 @@
+         super("Logo", "Logo", 1, 0, 0);
+     }
+ 
+-    ResourceLocation r = new ResourceLocation("custom/logo.png");
++    ResourceLocation r = new ResourceLocation("resources/logo.png");
+ 
+     @Override
+ 	public void render() {
